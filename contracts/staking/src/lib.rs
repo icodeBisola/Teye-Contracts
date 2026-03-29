@@ -1,4 +1,4 @@
-#![no_std]
+﻿#![no_std]
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod audit;
@@ -1343,3 +1343,4 @@ mod test_multisig;
 
 #[cfg(test)]
 mod test_late_quorum;
+mod test_reward_multiplier;
