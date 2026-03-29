@@ -1,7 +1,10 @@
 #![cfg(test)]
 
-use soroban_sdk::{Env, testutils::{Address as _, Events}};
-use crate::KeyManagerContract; // adjust if needed
+use crate::KeyManagerContract;
+use soroban_sdk::{
+    testutils::{Address as _, Events},
+    Env,
+}; // adjust if needed
 
 fn setup_env() -> Env {
     let env = Env::default();
@@ -37,7 +40,10 @@ fn test_key_creation_emits_event() {
     assert_eq!(last_event.topics.len(), 2);
 
     // Match event name
-    assert_eq!(last_event.topics.get(0).unwrap().to_symbol().unwrap(), "key_created");
+    assert_eq!(
+        last_event.topics.get(0).unwrap().to_symbol().unwrap(),
+        "key_created"
+    );
 
     // Match key_id in topics (if applicable)
     assert_eq!(last_event.topics.get(1).unwrap(), key_id.into_val(&env));
@@ -67,7 +73,10 @@ fn test_key_usage_emits_event() {
 
     let event = events.first().unwrap();
 
-    assert_eq!(event.topics.get(0).unwrap().to_symbol().unwrap(), "key_used");
+    assert_eq!(
+        event.topics.get(0).unwrap().to_symbol().unwrap(),
+        "key_used"
+    );
     assert_eq!(event.topics.get(1).unwrap(), key_id.into_val(&env));
 }
 
@@ -91,7 +100,10 @@ fn test_key_revocation_emits_event() {
 
     let event = events.first().unwrap();
 
-    assert_eq!(event.topics.get(0).unwrap().to_symbol().unwrap(), "key_revoked");
+    assert_eq!(
+        event.topics.get(0).unwrap().to_symbol().unwrap(),
+        "key_revoked"
+    );
     assert_eq!(event.topics.get(1).unwrap(), key_id.into_val(&env));
 }
 

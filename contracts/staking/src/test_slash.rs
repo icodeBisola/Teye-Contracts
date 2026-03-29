@@ -1,10 +1,6 @@
 extern crate std;
 
-use soroban_sdk::{
-    testutils::Address as _,
-    token::StellarAssetClient,
-    Address, Env,
-};
+use soroban_sdk::{testutils::Address as _, token::StellarAssetClient, Address, Env};
 
 use crate::{ContractError, StakingContract, StakingContractClient};
 
@@ -68,7 +64,10 @@ fn test_slash_by_admin_succeeds() {
     mint_and_stake(&env, &client, &stake_token, &validator, 1_000);
 
     let slashed = client.slash(&admin, &validator, &500);
-    assert_eq!(slashed, 500, "admin slash must return the actual slashed amount");
+    assert_eq!(
+        slashed, 500,
+        "admin slash must return the actual slashed amount"
+    );
 }
 
 #[test]
@@ -127,7 +126,10 @@ fn test_slash_capped_at_validator_balance() {
 
     let slashed = client.slash(&admin, &validator, &1_000);
 
-    assert_eq!(slashed, 500, "slash must be capped at the validator's balance");
+    assert_eq!(
+        slashed, 500,
+        "slash must be capped at the validator's balance"
+    );
     assert_eq!(client.get_staked(&validator), 0);
     assert_eq!(client.get_total_staked(), 0);
 }

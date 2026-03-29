@@ -130,7 +130,10 @@ fn test_non_admin_blocked_regardless_of_policy_verdict_true() {
 #[test]
 fn test_patient_read_only() {
     let ac = AccessControl::new();
-    assert!(ac.check(&Role::Patient, "read"), "Patient must be able to read");
+    assert!(
+        ac.check(&Role::Patient, "read"),
+        "Patient must be able to read"
+    );
     assert!(!ac.check(&Role::Patient, "write"), "Patient must not write");
     assert!(!ac.check(&Role::Patient, "audit"), "Patient must not audit");
 }

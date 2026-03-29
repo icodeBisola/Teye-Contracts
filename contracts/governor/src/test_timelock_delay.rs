@@ -1,12 +1,17 @@
-﻿//! Tests for Timelock Controller minimum delay enforcement.
+//! Tests for Timelock Controller minimum delay enforcement.
 //! Covers: early execution rejection, delay constants, cancellation flow.
 #[cfg(test)]
 mod tests {
     use crate::execution::{
         timelock_duration, TIMELOCK_EMERGENCY, TIMELOCK_STANDARD, TIMELOCK_UPGRADE,
     };
-    use crate::proposal::{load, next_id, store, Proposal, ProposalAction, ProposalPhase, ProposalType};
-    use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, BytesN, Env, String, Vec, symbol_short};
+    use crate::proposal::{
+        load, next_id, store, Proposal, ProposalAction, ProposalPhase, ProposalType,
+    };
+    use soroban_sdk::{
+        symbol_short, testutils::Address as _, testutils::Ledger as _, Address, BytesN, Env,
+        String, Vec,
+    };
 
     // -----------------------------------------------------------------------
     // Helpers
@@ -67,11 +72,26 @@ mod tests {
 
     #[test]
     fn test_timelock_duration_by_proposal_type() {
-        assert_eq!(timelock_duration(&ProposalType::EmergencyAction), TIMELOCK_EMERGENCY);
-        assert_eq!(timelock_duration(&ProposalType::ContractUpgrade), TIMELOCK_UPGRADE);
-        assert_eq!(timelock_duration(&ProposalType::ParameterChange), TIMELOCK_STANDARD);
-        assert_eq!(timelock_duration(&ProposalType::PolicyModification), TIMELOCK_STANDARD);
-        assert_eq!(timelock_duration(&ProposalType::TreasurySpend), TIMELOCK_STANDARD);
+        assert_eq!(
+            timelock_duration(&ProposalType::EmergencyAction),
+            TIMELOCK_EMERGENCY
+        );
+        assert_eq!(
+            timelock_duration(&ProposalType::ContractUpgrade),
+            TIMELOCK_UPGRADE
+        );
+        assert_eq!(
+            timelock_duration(&ProposalType::ParameterChange),
+            TIMELOCK_STANDARD
+        );
+        assert_eq!(
+            timelock_duration(&ProposalType::PolicyModification),
+            TIMELOCK_STANDARD
+        );
+        assert_eq!(
+            timelock_duration(&ProposalType::TreasurySpend),
+            TIMELOCK_STANDARD
+        );
     }
 
     // -----------------------------------------------------------------------

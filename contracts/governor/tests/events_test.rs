@@ -13,7 +13,14 @@ use soroban_sdk::{
     vec, Address, BytesN, Env, IntoVal, String, Vec,
 };
 
-fn setup() -> (Env, Address, GovernorContractClient<'static>, Address, Address, Address) {
+fn setup() -> (
+    Env,
+    Address,
+    GovernorContractClient<'static>,
+    Address,
+    Address,
+    Address,
+) {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -51,7 +58,12 @@ fn advance_time(env: &Env, secs: u64) {
 }
 
 /// Replicate the governor's commitment hash: SHA-256(proposal_id_le || choice_byte || salt).
-fn compute_commitment(env: &Env, proposal_id: u64, choice_byte: u8, salt: &BytesN<32>) -> BytesN<32> {
+fn compute_commitment(
+    env: &Env,
+    proposal_id: u64,
+    choice_byte: u8,
+    salt: &BytesN<32>,
+) -> BytesN<32> {
     use soroban_sdk::Bytes;
     let mut data = Bytes::new(env);
     for b in proposal_id.to_le_bytes().iter() {
@@ -72,9 +84,21 @@ fn test_proposal_created_event() {
     set_mock_stake(&env, &contract_id, &proposer, 10_000);
 
     let target = Address::generate(&env);
-    let actions = vec![&env, ProposalAction { target: target.clone(), function: symbol_short!("GOV_PRM"), params_hash: BytesN::from_array(&env, &[0u8; 32]) }];
+    let actions = vec![
+        &env,
+        ProposalAction {
+            target: target.clone(),
+            function: symbol_short!("GOV_PRM"),
+            params_hash: BytesN::from_array(&env, &[0u8; 32]),
+        },
+    ];
 
-    let id = client.create_proposal(&proposer, &ProposalType::ParameterChange, &String::from_str(&env, "Create event"), &actions);
+    let id = client.create_proposal(
+        &proposer,
+        &ProposalType::ParameterChange,
+        &String::from_str(&env, "Create event"),
+        &actions,
+    );
 
     let binding = env.events().all();
     let all = binding.events();
@@ -99,9 +123,21 @@ fn test_phase_transition_event() {
     set_mock_stake(&env, &contract_id, &proposer, 10_000);
 
     let target = Address::generate(&env);
-    let actions = vec![&env, ProposalAction { target: target.clone(), function: symbol_short!("GOV_PRM"), params_hash: BytesN::from_array(&env, &[0u8; 32]) }];
+    let actions = vec![
+        &env,
+        ProposalAction {
+            target: target.clone(),
+            function: symbol_short!("GOV_PRM"),
+            params_hash: BytesN::from_array(&env, &[0u8; 32]),
+        },
+    ];
 
-    let id = client.create_proposal(&proposer, &ProposalType::ParameterChange, &String::from_str(&env, "Phase event"), &actions);
+    let id = client.create_proposal(
+        &proposer,
+        &ProposalType::ParameterChange,
+        &String::from_str(&env, "Phase event"),
+        &actions,
+    );
 
     // Advance Draft -> Discussion
     client.advance_phase(&proposer, &id);
@@ -128,9 +164,21 @@ fn test_vote_commit_and_reveal_events() {
     set_mock_stake(&env, &contract_id, &proposer, 10_000);
 
     let target = Address::generate(&env);
-    let actions = vec![&env, ProposalAction { target: target.clone(), function: symbol_short!("GOV_PRM"), params_hash: BytesN::from_array(&env, &[0u8; 32]) }];
+    let actions = vec![
+        &env,
+        ProposalAction {
+            target: target.clone(),
+            function: symbol_short!("GOV_PRM"),
+            params_hash: BytesN::from_array(&env, &[0u8; 32]),
+        },
+    ];
 
-    let id = client.create_proposal(&proposer, &ProposalType::ParameterChange, &String::from_str(&env, "Vote events"), &actions);
+    let id = client.create_proposal(
+        &proposer,
+        &ProposalType::ParameterChange,
+        &String::from_str(&env, "Vote events"),
+        &actions,
+    );
 
     // Move to Voting phase
     client.advance_phase(&proposer, &id);

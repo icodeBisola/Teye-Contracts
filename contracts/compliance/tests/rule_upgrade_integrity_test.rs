@@ -16,7 +16,9 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use compliance::rules_engine::{ComplianceRule, ComplianceVerdict, Jurisdiction, OperationContext, RulesEngine, Severity};
+use compliance::rules_engine::{
+    ComplianceRule, ComplianceVerdict, Jurisdiction, OperationContext, RulesEngine, Severity,
+};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,7 +110,8 @@ impl VersionedRulesEngine {
         now: u64,
         jurisdiction: Jurisdiction,
     ) -> compliance::rules_engine::ComplianceReport {
-        self.engine.generate_report(period_start, period_end, now, jurisdiction)
+        self.engine
+            .generate_report(period_start, period_end, now, jurisdiction)
     }
 }
 
@@ -195,9 +198,7 @@ fn historical_violations_remain_unchanged_after_rule_relaxation() {
         jurisdictions: vec![Jurisdiction::US],
         severity: Severity::Critical,
         remediation: "Enable encryption".into(),
-        evaluate: Box::new(|ctx| {
-            ctx.metadata.get("encrypted").map_or(false, |v| v == "true")
-        }),
+        evaluate: Box::new(|ctx| ctx.metadata.get("encrypted").map_or(false, |v| v == "true")),
     });
 
     // Record a non-compliant operation (missing encryption)
@@ -215,8 +216,7 @@ fn historical_violations_remain_unchanged_after_rule_relaxation() {
         "Should have one violation"
     );
     assert_eq!(
-        original_verdict.violations[0].rule_id,
-        "ENCRYPTION-001",
+        original_verdict.violations[0].rule_id, "ENCRYPTION-001",
         "Violation should be for encryption rule"
     );
 
@@ -298,9 +298,7 @@ fn new_rules_only_apply_to_future_transactions() {
             jurisdictions: vec![Jurisdiction::US],
             severity: Severity::Critical,
             remediation: "Obtain consent with proper metadata".into(),
-            evaluate: Box::new(|ctx| {
-                ctx.has_consent && ctx.metadata.get("lawful_basis").is_some()
-            }),
+            evaluate: Box::new(|ctx| ctx.has_consent && ctx.metadata.get("lawful_basis").is_some()),
         },
         2,
     );
@@ -367,7 +365,9 @@ fn grace_period_prevents_retroactive_rule_application() {
                 true // Grace period: old transactions pass
             } else {
                 // New transactions must meet requirement
-                ctx.metadata.get("new_requirement").map_or(false, |v| v == "true")
+                ctx.metadata
+                    .get("new_requirement")
+                    .map_or(false, |v| v == "true")
             }
         }),
     });
@@ -427,7 +427,9 @@ fn multiple_rule_upgrades_with_staggered_grace_periods() {
             if ctx.timestamp < 1000 {
                 true
             } else {
-                ctx.metadata.get("delayed_1000").map_or(false, |v| v == "true")
+                ctx.metadata
+                    .get("delayed_1000")
+                    .map_or(false, |v| v == "true")
             }
         }),
     });
@@ -443,7 +445,9 @@ fn multiple_rule_upgrades_with_staggered_grace_periods() {
             if ctx.timestamp < 2000 {
                 true
             } else {
-                ctx.metadata.get("delayed_2000").map_or(false, |v| v == "true")
+                ctx.metadata
+                    .get("delayed_2000")
+                    .map_or(false, |v| v == "true")
             }
         }),
     });
@@ -562,10 +566,7 @@ fn rule_update_is_atomic() {
     let verdict = eng.evaluate(&ctx);
 
     // Should have violations for ATOMIC-002 (missing metadata)
-    assert!(
-        !verdict.allowed,
-        "Should be blocked by new atomic rule"
-    );
+    assert!(!verdict.allowed, "Should be blocked by new atomic rule");
     assert!(
         verdict.violations.iter().any(|v| v.rule_id == "ATOMIC-002"),
         "Should have violation for ATOMIC-002"
@@ -605,9 +606,7 @@ fn concurrent_rule_updates_maintain_consistency() {
             jurisdictions: vec![Jurisdiction::US],
             severity: Severity::Critical,
             remediation: "Enable encryption".into(),
-            evaluate: Box::new(|ctx| {
-                ctx.metadata.get("encrypted").map_or(false, |v| v == "true")
-            }),
+            evaluate: Box::new(|ctx| ctx.metadata.get("encrypted").map_or(false, |v| v == "true")),
         });
     });
 
@@ -621,7 +620,9 @@ fn concurrent_rule_updates_maintain_consistency() {
             severity: Severity::Warning,
             remediation: "Enable audit logging".into(),
             evaluate: Box::new(|ctx| {
-                ctx.metadata.get("audit_logged").map_or(false, |v| v == "true")
+                ctx.metadata
+                    .get("audit_logged")
+                    .map_or(false, |v| v == "true")
             }),
         });
     });
@@ -636,11 +637,17 @@ fn concurrent_rule_updates_maintain_consistency() {
 
     // Should have violations for both new rules
     assert!(
-        verdict.violations.iter().any(|v| v.rule_id == "CONCURRENT-001"),
+        verdict
+            .violations
+            .iter()
+            .any(|v| v.rule_id == "CONCURRENT-001"),
         "Should have encryption violation"
     );
     assert!(
-        verdict.violations.iter().any(|v| v.rule_id == "CONCURRENT-002"),
+        verdict
+            .violations
+            .iter()
+            .any(|v| v.rule_id == "CONCURRENT-002"),
         "Should have audit logging violation"
     );
     assert!(
@@ -678,9 +685,7 @@ fn rule_rollback_maintains_historical_integrity() {
         jurisdictions: vec![Jurisdiction::US],
         severity: Severity::Critical,
         remediation: "Fix".into(),
-        evaluate: Box::new(|ctx| {
-            ctx.metadata.get("strict").map_or(false, |v| v == "true")
-        }),
+        evaluate: Box::new(|ctx| ctx.metadata.get("strict").map_or(false, |v| v == "true")),
     });
 
     // Record transaction under stricter rules
@@ -950,7 +955,10 @@ fn empty_rule_set_upgrade() {
         re_evaluated.allowed,
         "Should still be allowed (has consent)"
     );
-    assert_eq!(re_evaluated.rules_evaluated, 1, "One rule should be evaluated");
+    assert_eq!(
+        re_evaluated.rules_evaluated, 1,
+        "One rule should be evaluated"
+    );
 }
 
 #[test]
@@ -998,10 +1006,7 @@ fn rule_removal_during_upgrade() {
 
     // Re-evaluate with upgraded engine
     let upgraded_verdict = upgraded_engine.evaluate(&ctx);
-    assert!(
-        upgraded_verdict.allowed,
-        "Should still be compliant"
-    );
+    assert!(upgraded_verdict.allowed, "Should still be compliant");
     assert_eq!(
         upgraded_verdict.rules_evaluated, 1,
         "Only one rule should be evaluated after removal"
@@ -1054,9 +1059,7 @@ fn rule_upgrade_with_multiple_jurisdictions() {
         jurisdictions: vec![Jurisdiction::Both],
         severity: Severity::Critical,
         remediation: "Fix".into(),
-        evaluate: Box::new(|ctx| {
-            ctx.has_consent && ctx.metadata.get("gdpr_compliant").is_some()
-        }),
+        evaluate: Box::new(|ctx| ctx.has_consent && ctx.metadata.get("gdpr_compliant").is_some()),
     });
 
     // Re-evaluate historical transactions

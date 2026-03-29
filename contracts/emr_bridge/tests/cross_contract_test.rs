@@ -83,8 +83,13 @@ fn test_cross_contract_successful_exchange_with_external_emr() {
     let (env, client, admin) = setup_bridge();
 
     // Register provider that will act as external contract interface
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "epic-external-001", EmrSystem::EpicFhir);
+    let provider_id = register_and_activate_provider(
+        &env,
+        &client,
+        &admin,
+        "epic-external-001",
+        EmrSystem::EpicFhir,
+    );
 
     // Simulate cross-contract call to external EMR system
     let external_contract = MockExternalEmrContract::new(&env, &provider_id, true);
@@ -122,8 +127,13 @@ fn test_cross_contract_successful_exchange_with_external_emr() {
 fn test_cross_contract_graceful_failure_when_external_unavailable() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "cerner-external-001", EmrSystem::CernerMillennium);
+    let provider_id = register_and_activate_provider(
+        &env,
+        &client,
+        &admin,
+        "cerner-external-001",
+        EmrSystem::CernerMillennium,
+    );
 
     // Simulate unavailable external contract
     let external_contract = MockExternalEmrContract::new(&env, &provider_id, false);
@@ -365,8 +375,13 @@ fn test_cross_contract_unauthorized_caller_fails() {
 fn test_cross_contract_provider_state_transitions() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "epic-state-001", EmrSystem::EpicFhir);
+    let provider_id = register_and_activate_provider(
+        &env,
+        &client,
+        &admin,
+        "epic-state-001",
+        EmrSystem::EpicFhir,
+    );
 
     // Verify provider is active before cross-contract call
     let provider = client.get_provider(&String::from_str(&env, &provider_id));
@@ -377,7 +392,10 @@ fn test_cross_contract_provider_state_transitions() {
     let _response = ext_contract.simulate_call().expect("Should succeed");
 
     // Record exchange based on successful call
-    let exchange_id = String::from_str(&env, &format!("cross-ex-state-{}", env.ledger().timestamp()));
+    let exchange_id = String::from_str(
+        &env,
+        &format!("cross-ex-state-{}", env.ledger().timestamp()),
+    );
     let patient_id = String::from_str(&env, "pat-state-001");
 
     let _record = client.record_data_exchange(
@@ -402,8 +420,13 @@ fn test_cross_contract_provider_state_transitions() {
 fn test_cross_contract_field_mapping_validation() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "epic-mapping-001", EmrSystem::EpicFhir);
+    let provider_id = register_and_activate_provider(
+        &env,
+        &client,
+        &admin,
+        "epic-mapping-001",
+        EmrSystem::EpicFhir,
+    );
 
     // Create field mapping for external contract data transformation
     let mapping_id = String::from_str(&env, "mapping-001");
@@ -477,8 +500,13 @@ fn test_cross_contract_retry_failed_external_call() {
 fn test_cross_contract_audit_trail_via_exchanges() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "epic-audit-001", EmrSystem::EpicFhir);
+    let provider_id = register_and_activate_provider(
+        &env,
+        &client,
+        &admin,
+        "epic-audit-001",
+        EmrSystem::EpicFhir,
+    );
 
     // Record multiple exchanges from same external contract
     let patient_id = String::from_str(&env, "pat-audit-001");

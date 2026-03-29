@@ -10,7 +10,9 @@ use key_manager::{
     KeyType,
 };
 use soroban_sdk::{
-    symbol_short, testutils::{Address as _, Ledger}, Address, BytesN, Env, Vec,
+    symbol_short,
+    testutils::{Address as _, Ledger},
+    Address, BytesN, Env, Vec,
 };
 
 fn setup() -> (Env, KeyManagerContractClient<'static>, Address) {
@@ -33,7 +35,12 @@ fn unrestricted_policy(env: &Env) -> KeyPolicy {
     }
 }
 
-fn make_key(env: &Env, client: &KeyManagerContractClient, admin: &Address, policy: KeyPolicy) -> BytesN<32> {
+fn make_key(
+    env: &Env,
+    client: &KeyManagerContractClient,
+    admin: &Address,
+    policy: KeyPolicy,
+) -> BytesN<32> {
     let key_bytes = BytesN::from_array(env, &[1u8; 32]);
     client.create_master_key(admin, &KeyType::Signing, &policy, &0u64, &key_bytes)
 }
@@ -144,7 +151,8 @@ fn test_create_key_with_inverted_time_window_rejected() {
         allowed_ops: Vec::new(&env),
     };
     let key_bytes = BytesN::from_array(&env, &[2u8; 32]);
-    let result = client.try_create_master_key(&admin, &KeyType::Signing, &policy, &0u64, &key_bytes);
+    let result =
+        client.try_create_master_key(&admin, &KeyType::Signing, &policy, &0u64, &key_bytes);
     assert_eq!(result, Err(Ok(ContractError::InvalidPolicy)));
 }
 
@@ -166,7 +174,9 @@ fn test_max_uses_one_allows_single_use_then_rejects() {
     let key_id = make_key(&env, &client, &admin, policy);
 
     // First use must succeed.
-    assert!(client.try_use_key(&admin, &key_id, &symbol_short!("SIGN")).is_ok());
+    assert!(client
+        .try_use_key(&admin, &key_id, &symbol_short!("SIGN"))
+        .is_ok());
 
     // Second use must be denied.
     let result = client.try_use_key(&admin, &key_id, &symbol_short!("SIGN"));
@@ -188,7 +198,9 @@ fn test_max_uses_boundary_at_exact_limit() {
     let key_id = make_key(&env, &client, &admin, policy);
 
     for _ in 0..max {
-        assert!(client.try_use_key(&admin, &key_id, &symbol_short!("SIGN")).is_ok());
+        assert!(client
+            .try_use_key(&admin, &key_id, &symbol_short!("SIGN"))
+            .is_ok());
     }
 
     // One more beyond the limit.
@@ -205,7 +217,9 @@ fn test_max_uses_zero_means_unlimited() {
     let key_id = make_key(&env, &client, &admin, policy);
 
     for _ in 0..20 {
-        assert!(client.try_use_key(&admin, &key_id, &symbol_short!("SIGN")).is_ok());
+        assert!(client
+            .try_use_key(&admin, &key_id, &symbol_short!("SIGN"))
+            .is_ok());
     }
 }
 
@@ -336,7 +350,9 @@ fn test_allowed_ops_filters_disallowed_operation() {
     let key_id = make_key(&env, &client, &admin, policy);
 
     // Allowed operation.
-    assert!(client.try_use_key(&admin, &key_id, &symbol_short!("ENC")).is_ok());
+    assert!(client
+        .try_use_key(&admin, &key_id, &symbol_short!("ENC"))
+        .is_ok());
 
     // Disallowed operation.
     let result = client.try_use_key(&admin, &key_id, &symbol_short!("SIGN"));
@@ -350,7 +366,13 @@ fn test_empty_allowed_ops_permits_any_operation() {
 
     let key_id = make_key(&env, &client, &admin, unrestricted_policy(&env));
 
-    assert!(client.try_use_key(&admin, &key_id, &symbol_short!("SIGN")).is_ok());
-    assert!(client.try_use_key(&admin, &key_id, &symbol_short!("ENC")).is_ok());
-    assert!(client.try_use_key(&admin, &key_id, &symbol_short!("AUTH")).is_ok());
+    assert!(client
+        .try_use_key(&admin, &key_id, &symbol_short!("SIGN"))
+        .is_ok());
+    assert!(client
+        .try_use_key(&admin, &key_id, &symbol_short!("ENC"))
+        .is_ok());
+    assert!(client
+        .try_use_key(&admin, &key_id, &symbol_short!("AUTH"))
+        .is_ok());
 }

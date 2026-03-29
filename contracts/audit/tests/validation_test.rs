@@ -50,7 +50,9 @@ fn test_append_with_zero_timestamp() {
 fn test_append_with_u64_max_timestamp() {
     let seg = LogSegmentId::new("max-ts").unwrap();
     let mut log = MerkleLog::new(seg);
-    let seq = log.append(u64::MAX, "actor", "action", "target", "ok").unwrap();
+    let seq = log
+        .append(u64::MAX, "actor", "action", "target", "ok")
+        .unwrap();
     assert_eq!(seq, 1);
     // Inclusion proof must still be constructable.
     assert!(log.inclusion_proof(seq).is_ok());

@@ -1,6 +1,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use cross_chain::{CrossChainContract, CrossChainContractClient, CrossChainError, CrossChainMessage};
+use cross_chain::{
+    CrossChainContract, CrossChainContractClient, CrossChainError, CrossChainMessage,
+};
 use soroban_sdk::{symbol_short, testutils::Address as _, Address, Bytes, Env, String};
 
 #[test]

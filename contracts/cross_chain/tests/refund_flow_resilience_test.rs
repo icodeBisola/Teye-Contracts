@@ -55,9 +55,7 @@ impl MockAssetLock {
     pub fn lock_assets(env: Env, from: Address, amount: i128, message_id: Bytes) {
         let key = (symbol_short!("LOCK"), from.clone(), message_id);
         let current: i128 = env.storage().persistent().get(&key).unwrap_or(0);
-        env.storage()
-            .persistent()
-            .set(&key, &(current + amount));
+        env.storage().persistent().set(&key, &(current + amount));
     }
 
     /// Releases locked assets (refund)
@@ -141,10 +139,13 @@ fn test_expired_export_package_handling() {
     // Import should still work if proof is valid and finality met
     // (This tests that timeout is not based on package timestamp alone)
     let result = client.try_import_record(&pkg, &exported_root);
-    
+
     // The current implementation doesn't check package expiry,
     // only finality window. This is expected behavior.
-    assert!(result.is_ok(), "Valid proof should be accepted regardless of age");
+    assert!(
+        result.is_ok(),
+        "Valid proof should be accepted regardless of age"
+    );
 }
 
 /// Test import after excessive delay (destination chain unreachable)
@@ -173,8 +174,11 @@ fn test_destination_chain_timeout_scenario() {
 
     // Lock assets on source chain
     env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&user, transfer_amount, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(
+            &user,
+            transfer_amount,
+            &message_id,
+        );
     });
 
     // Create and export package
@@ -202,11 +206,13 @@ fn test_destination_chain_timeout_scenario() {
     // In production, this would trigger refund flow
     // For now, verify assets remain locked
     let locked_before: i128 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user, &message_id)
     });
 
-    assert_eq!(locked_before, transfer_amount, "Assets should remain locked");
+    assert_eq!(
+        locked_before, transfer_amount,
+        "Assets should remain locked"
+    );
 
     // After timeout period, refund should be possible
     // (Implementation would check timeout threshold here)
@@ -220,11 +226,13 @@ fn test_destination_chain_timeout_scenario() {
 
     // Verify no assets remain locked
     let locked_after: i128 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user, &message_id)
     });
 
-    assert_eq!(locked_after, 0, "No assets should remain locked after refund");
+    assert_eq!(
+        locked_after, 0,
+        "No assets should remain locked after refund"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -327,7 +335,10 @@ fn test_rollback_on_import_verification_failure() {
 
     // Verify no import record was created (rollback)
     let import_record = client.get_import_timestamp(&record_id_bytes);
-    assert!(import_record.is_none(), "No import record should exist after failure");
+    assert!(
+        import_record.is_none(),
+        "No import record should exist after failure"
+    );
 }
 
 /// Test multiple sequential failures don't corrupt state
@@ -379,7 +390,10 @@ fn test_multiple_failures_no_state_corruption() {
     };
 
     let result = client.try_process_message(&relayer, &success_msg_id, &success_msg, &vision_id);
-    assert!(result.is_ok(), "Valid message should succeed after failures");
+    assert!(
+        result.is_ok(),
+        "Valid message should succeed after failures"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -400,8 +414,7 @@ fn test_refund_zero_amount() {
 
     // Try to refund without any locked assets
     let result = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .release_assets(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).release_assets(&user, &message_id)
     });
 
     assert!(result.is_err(), "Refunding unlocked assets should fail");
@@ -421,15 +434,16 @@ fn test_refund_nonexistent_message() {
 
     // No assets were ever locked for this message
     let locked = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user, &nonexistent_msg)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user, &nonexistent_msg)
     });
 
-    assert_eq!(locked, 0, "No assets should be locked for nonexistent message");
+    assert_eq!(
+        locked, 0,
+        "No assets should be locked for nonexistent message"
+    );
 
     let result = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .release_assets(&user, &nonexistent_msg)
+        MockAssetLockClient::new(&env, &asset_lock_id).release_assets(&user, &nonexistent_msg)
     });
 
     assert!(result.is_err(), "Cannot refund nonexistent locked assets");
@@ -450,8 +464,11 @@ fn test_double_refund_prevention() {
 
     // Lock assets
     env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&user, transfer_amount, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(
+            &user,
+            transfer_amount,
+            &message_id,
+        );
     });
 
     // First refund should succeed
@@ -464,8 +481,7 @@ fn test_double_refund_prevention() {
 
     // Second refund should fail
     let refund2 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .release_assets(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).release_assets(&user, &message_id)
     });
     assert!(refund2.is_err(), "Double refund should be prevented");
 }
@@ -485,10 +501,8 @@ fn test_partial_refund_scenarios() {
 
     // Multiple users lock assets for same message (e.g., batch transfer)
     env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&user1, 300i128, &message_id);
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&user2, 700i128, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(&user1, 300i128, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(&user2, 700i128, &message_id);
     });
 
     // Refund user1
@@ -501,8 +515,7 @@ fn test_partial_refund_scenarios() {
 
     // User2's assets should still be locked
     let locked_user2 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user2, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user2, &message_id)
     });
     assert_eq!(locked_user2, 700i128, "User2's assets should remain locked");
 
@@ -531,20 +544,25 @@ fn test_refund_unauthorized_caller() {
 
     // Legitimate user locks assets
     env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&legitimate_user, transfer_amount, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(
+            &legitimate_user,
+            transfer_amount,
+            &message_id,
+        );
     });
 
     // Attacker tries to refund to themselves
     // (In real implementation, this would require authentication)
     // Mock currently doesn't enforce auth, but this test documents the requirement
     let attacker_refund = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .release_assets(&attacker, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).release_assets(&attacker, &message_id)
     });
 
     // Should fail because attacker has no locked assets under their address
-    assert!(attacker_refund.is_err(), "Attacker cannot refund to themselves");
+    assert!(
+        attacker_refund.is_err(),
+        "Attacker cannot refund to themselves"
+    );
 
     // Legitimate user can still refund
     let legitimate_refund = env.as_contract(&asset_lock_id, || {
@@ -552,7 +570,10 @@ fn test_refund_unauthorized_caller() {
             .release_assets(&legitimate_user, &message_id)
             .unwrap()
     });
-    assert_eq!(legitimate_refund, transfer_amount, "Legitimate user should refund successfully");
+    assert_eq!(
+        legitimate_refund, transfer_amount,
+        "Legitimate user should refund successfully"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -598,7 +619,7 @@ fn test_import_at_finality_boundary() {
     // With finality_depth=1, should succeed
     // This tests the minimum finality boundary
     let result = client.try_import_record(&pkg, &exported_root);
-    
+
     // Behavior depends on implementation's finality check
     // Current impl may accept or reject based on exact comparison
     // This test documents the edge case
@@ -675,8 +696,11 @@ fn test_complete_timeout_refund_flow() {
     let message_id = Bytes::from_slice(&env, b"complete_flow");
 
     env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .lock_assets(&user, transfer_amount, &message_id);
+        MockAssetLockClient::new(&env, &asset_lock_id).lock_assets(
+            &user,
+            transfer_amount,
+            &message_id,
+        );
     });
 
     // Phase 2: Create export package
@@ -703,10 +727,12 @@ fn test_complete_timeout_refund_flow() {
 
     // Phase 4: Verify assets still locked
     let locked_before: i128 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user, &message_id)
     });
-    assert_eq!(locked_before, transfer_amount, "Assets should remain locked during timeout");
+    assert_eq!(
+        locked_before, transfer_amount,
+        "Assets should remain locked during timeout"
+    );
 
     // Phase 5: Trigger refund
     let refunded: i128 = env.as_contract(&asset_lock_id, || {
@@ -718,12 +744,17 @@ fn test_complete_timeout_refund_flow() {
 
     // Phase 6: Verify state cleanup
     let locked_after: i128 = env.as_contract(&asset_lock_id, || {
-        MockAssetLockClient::new(&env, &asset_lock_id)
-            .get_locked_amount(&user, &message_id)
+        MockAssetLockClient::new(&env, &asset_lock_id).get_locked_amount(&user, &message_id)
     });
-    assert_eq!(locked_after, 0, "All assets should be released after refund");
+    assert_eq!(
+        locked_after, 0,
+        "All assets should be released after refund"
+    );
 
     // Phase 7: Verify bridge state unchanged (record never imported)
     let import_ts = client.get_import_timestamp(&record_id_bytes);
-    assert!(import_ts.is_none(), "Record should not be imported after timeout");
+    assert!(
+        import_ts.is_none(),
+        "Record should not be imported after timeout"
+    );
 }

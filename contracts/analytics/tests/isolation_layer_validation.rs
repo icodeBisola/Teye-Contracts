@@ -1,7 +1,7 @@
 extern crate std;
 
-use analytics::{AnalyticsContract, AnalyticsContractClient, MetricDimensions, ContractError};
-use soroban_sdk::{testutils::Address as _, Address, Env, Vec, symbol_short};
+use analytics::{AnalyticsContract, AnalyticsContractClient, ContractError, MetricDimensions};
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Vec};
 
 fn setup_isolation_layer_test() -> (Env, AnalyticsContractClient<'static>, Address, Address) {
     let env = Env::default();
@@ -53,7 +53,11 @@ fn test_region_key_validation() {
         
         // Should succeed with valid region
         let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-        assert!(result.is_ok(), "Should succeed with valid region: {:?}", region);
+        assert!(
+            result.is_ok(),
+            "Should succeed with valid region: {:?}",
+            region
+        );
     }
 
     // Test null region
@@ -68,7 +72,8 @@ fn test_region_key_validation() {
     null_records.push_back(client.encrypt(&10i128));
     
     // Should also succeed with null region
-    let null_result = client.try_aggregate_records(&aggregator, &kind, &null_region_dims, &null_records);
+    let null_result =
+        client.try_aggregate_records(&aggregator, &kind, &null_region_dims, &null_records);
     assert!(null_result.is_ok(), "Should succeed with null region");
 
     // Verify isolation between different regions
@@ -104,10 +109,10 @@ fn test_age_band_key_validation() {
 
     // Test valid age band keys
     let valid_age_bands = vec![
-        symbol_short!("A0_17"),    // Minors
-        symbol_short!("A18_39"),   // Young adults
-        symbol_short!("A40_64"),   // Middle-aged adults
-        symbol_short!("A65P"),     // Seniors
+        symbol_short!("A0_17"),  // Minors
+        symbol_short!("A18_39"), // Young adults
+        symbol_short!("A40_64"), // Middle-aged adults
+        symbol_short!("A65P"),   // Seniors
     ];
 
     for age_band in &valid_age_bands {
@@ -123,7 +128,11 @@ fn test_age_band_key_validation() {
         
         // Should succeed with valid age band
         let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-        assert!(result.is_ok(), "Should succeed with valid age band: {:?}", age_band);
+        assert!(
+            result.is_ok(),
+            "Should succeed with valid age band: {:?}",
+            age_band
+        );
     }
 
     // Test null age band
@@ -138,7 +147,8 @@ fn test_age_band_key_validation() {
     null_records.push_back(client.encrypt(&20i128));
     
     // Should succeed with null age band
-    let null_result = client.try_aggregate_records(&aggregator, &kind, &null_age_dims, &null_records);
+    let null_result =
+        client.try_aggregate_records(&aggregator, &kind, &null_age_dims, &null_records);
     assert!(null_result.is_ok(), "Should succeed with null age band");
 
     // Verify isolation between different age bands
@@ -191,7 +201,11 @@ fn test_condition_key_validation() {
         
         // Should succeed with valid condition
         let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-        assert!(result.is_ok(), "Should succeed with valid condition: {:?}", condition);
+        assert!(
+            result.is_ok(),
+            "Should succeed with valid condition: {:?}",
+            condition
+        );
     }
 
     // Test null condition
@@ -206,7 +220,8 @@ fn test_condition_key_validation() {
     null_records.push_back(client.encrypt(&30i128));
     
     // Should succeed with null condition
-    let null_result = client.try_aggregate_records(&aggregator, &kind, &null_condition_dims, &null_records);
+    let null_result =
+        client.try_aggregate_records(&aggregator, &kind, &null_condition_dims, &null_records);
     assert!(null_result.is_ok(), "Should succeed with null condition");
 
     // Verify isolation between different conditions
@@ -255,7 +270,11 @@ fn test_time_bucket_key_validation() {
         
         // Should succeed with valid time bucket
         let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-        assert!(result.is_ok(), "Should succeed with valid time bucket: {}", time_bucket);
+        assert!(
+            result.is_ok(),
+            "Should succeed with valid time bucket: {}",
+            time_bucket
+        );
     }
 
     // Test edge cases
@@ -274,7 +293,11 @@ fn test_time_bucket_key_validation() {
         
         // Should handle edge cases
         let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-        assert!(result.is_ok(), "Should handle edge time bucket: {}", time_bucket);
+        assert!(
+            result.is_ok(),
+            "Should handle edge time bucket: {}",
+            time_bucket
+        );
     }
 }
 
@@ -306,8 +329,14 @@ fn test_combination_key_isolation() {
                 records.push_back(client.encrypt(&10i128));
                 
                 let result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
-                assert!(result.is_ok(), "Should succeed with combination: region={:?}, age_band={:?}, condition={:?}", region, age_band, condition);
-                
+                assert!(
+                    result.is_ok(),
+                    "Should succeed with combination: region={:?}, age_band={:?}, condition={:?}",
+                    region,
+                    age_band,
+                    condition
+                );
+
                 combination_count += 1;
             }
         }
@@ -328,13 +357,16 @@ fn test_combination_key_isolation() {
 
                 let data = client.get_metric(&kind, &dims);
                 assert_eq!(data.count, 1, "Each combination should have its own data");
-                
+
                 verified_combinations += 1;
             }
         }
     }
 
-    assert_eq!(combination_count, verified_combinations, "All combinations should be verified");
+    assert_eq!(
+        combination_count, verified_combinations,
+        "All combinations should be verified"
+    );
     assert_eq!(combination_count, 8, "Should have 2*2*2 = 8 combinations");
 }
 
@@ -405,15 +437,23 @@ fn test_partial_null_combinations() {
     for (i, dims) in test_cases.iter().enumerate() {
         let mut records = Vec::new(&env);
         records.push_back(client.encrypt(&(i as i128 + 1)));
-        
+
         let result = client.try_aggregate_records(&aggregator, &kind, dims, &records);
-        assert!(result.is_ok(), "Should succeed with partial null combination {}", i);
+        assert!(
+            result.is_ok(),
+            "Should succeed with partial null combination {}",
+            i
+        );
     }
 
     // Verify each partial null combination is isolated
     for (i, dims) in test_cases.iter().enumerate() {
         let data = client.get_metric(&kind, dims);
-        assert_eq!(data.count, 1, "Partial null combination {} should have its own data", i);
+        assert_eq!(
+            data.count, 1,
+            "Partial null combination {} should have its own data",
+            i
+        );
     }
 }
 
@@ -489,10 +529,14 @@ fn test_authorization_layer_isolation() {
 
     // Test that only authorized aggregator can add data
     let unauthorized_user = Address::generate(&env);
-    
-    let unauthorized_result = client.try_aggregate_records(&unauthorized_user, &kind, &dims, &records);
+
+    let unauthorized_result =
+        client.try_aggregate_records(&unauthorized_user, &kind, &dims, &records);
     assert!(unauthorized_result.is_err());
-    assert_eq!(unauthorized_result.unwrap_err(), Ok(ContractError::Unauthorized));
+    assert_eq!(
+        unauthorized_result.unwrap_err(),
+        Ok(ContractError::Unauthorized)
+    );
 
     // Test that authorized aggregator can add data
     let authorized_result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
@@ -505,13 +549,19 @@ fn test_authorization_layer_isolation() {
     // Test that admin cannot aggregate data
     let admin_aggregate_result = client.try_aggregate_records(&_admin, &kind, &dims, &records);
     assert!(admin_aggregate_result.is_err());
-    assert_eq!(admin_aggregate_result.unwrap_err(), Ok(ContractError::Unauthorized));
+    assert_eq!(
+        admin_aggregate_result.unwrap_err(),
+        Ok(ContractError::Unauthorized)
+    );
 
     // Test that admin cannot decrypt data
     let ciphertext = client.encrypt(&42i128);
     let admin_decrypt_result = client.try_decrypt(&_admin, &ciphertext);
     assert!(admin_decrypt_result.is_err());
-    assert_eq!(admin_decrypt_result.unwrap_err(), Ok(ContractError::Unauthorized));
+    assert_eq!(
+        admin_decrypt_result.unwrap_err(),
+        Ok(ContractError::Unauthorized)
+    );
 
     // Test that aggregator can decrypt data
     let aggregator_decrypt_result = client.try_decrypt(&aggregator, &ciphertext);

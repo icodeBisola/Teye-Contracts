@@ -13,8 +13,8 @@
 
 use identity::{recovery::RecoveryError, IdentityContract, IdentityContractClient};
 use soroban_sdk::{
-    contract, contractimpl, contracterror, testutils::Address as _, testutils::Ledger as _, Address,
-    BytesN, Env,
+    contract, contracterror, contractimpl, testutils::Address as _, testutils::Ledger as _,
+    Address, BytesN, Env,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -352,7 +352,10 @@ fn consumer_sees_updated_owner_after_recovery_execution() {
     assert!(consumer.check_identity_active(&contract_id, &new_owner));
 
     // Guardian list is transferred to new owner.
-    assert_eq!(consumer.verify_guardian_count(&contract_id, &new_owner, &1), 3);
+    assert_eq!(
+        consumer.verify_guardian_count(&contract_id, &new_owner, &1),
+        3
+    );
 
     // Threshold is transferred to new owner.
     assert_eq!(consumer.get_threshold(&contract_id, &new_owner), 2);

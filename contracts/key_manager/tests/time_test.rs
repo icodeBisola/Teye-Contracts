@@ -1,7 +1,10 @@
 #![cfg(test)]
 
-use soroban_sdk::{Env, testutils::{Address as _, Ledger}};
-use crate::KeyManagerContract; // adjust if module path differs
+use crate::KeyManagerContract;
+use soroban_sdk::{
+    testutils::{Address as _, Ledger},
+    Env,
+}; // adjust if module path differs
 
 fn setup_env() -> Env {
     let env = Env::default();

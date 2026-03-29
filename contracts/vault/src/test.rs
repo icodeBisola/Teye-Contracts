@@ -39,7 +39,12 @@ fn setup_vault(
 }
 
 /// Add `n` guardians for `owner` in the identity contract and return them.
-fn add_guardians(env: &Env, identity: &IdentityContractClient, owner: &Address, n: u32) -> std::vec::Vec<Address> {
+fn add_guardians(
+    env: &Env,
+    identity: &IdentityContractClient,
+    owner: &Address,
+    n: u32,
+) -> std::vec::Vec<Address> {
     let mut guardians = std::vec::Vec::new();
     for _ in 0..n {
         let g = Address::generate(env);

@@ -2,13 +2,19 @@
 
 use crate::{ContractError, StakingContract, StakingContractClient};
 use soroban_sdk::{
-    symbol_short, 
+    symbol_short,
     testutils::{Address as _, Ledger as _},
     token::StellarAssetClient,
-    Address, BytesN, Env, Vec
+    Address, BytesN, Env, Vec,
 };
 
-fn setup() -> (Env, StakingContractClient<'static>, Address, Address, Address) {
+fn setup() -> (
+    Env,
+    StakingContractClient<'static>,
+    Address,
+    Address,
+    Address,
+) {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -55,7 +61,7 @@ fn test_late_quorum_delay_flow() {
     // 3. Setup a staker to monitor rewards
     let staker = Address::generate(&env);
     StellarAssetClient::new(&env, &stake_token).mint(&staker, &10_000);
-    
+
     env.ledger().set_timestamp(0);
     client.stake(&staker, &10_000);
 
@@ -67,7 +73,7 @@ fn test_late_quorum_delay_flow() {
     // 5. Reach quorum (s2 approves)
     env.ledger().set_timestamp(100);
     client.approve_admin_action(&s2, &proposal_id);
-    
+
     // 6. Execute set_reward_rate (reached late quorum)
     client.set_reward_rate(&admin, &2000, &proposal_id);
 
@@ -79,7 +85,7 @@ fn test_late_quorum_delay_flow() {
 
     // 8. Wait for delay to pass
     env.ledger().set_timestamp(3701);
-    
+
     // Rewards should still be calculated at old rate (1000) for the interval [0, 3701]
     // 1000 * 3701 = 3,701,000
     assert_eq!(client.get_pending_rewards(&staker), 3_701_000);
@@ -90,14 +96,14 @@ fn test_late_quorum_delay_flow() {
 
     // 10. Verify rewards start accruing at new rate
     env.ledger().set_timestamp(3801); // +100 seconds
-    // 3,701,000 + (2000 * 100) = 3,701,000 + 200,000 = 3,901,000
+                                      // 3,701,000 + (2000 * 100) = 3,701,000 + 200,000 = 3,901,000
     assert_eq!(client.get_pending_rewards(&staker), 3_901_000);
 }
 
 #[test]
 fn test_apply_too_early_fails() {
     let (env, client, admin, _, _) = setup();
-    
+
     // Configure delay
     client.set_rate_change_delay(&admin, &3600);
 

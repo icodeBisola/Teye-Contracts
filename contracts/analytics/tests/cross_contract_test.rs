@@ -35,7 +35,11 @@ pub struct MockMetricSourceContract;
 
 #[contractimpl]
 impl MockMetricSourceContract {
-    pub fn read_metric(_env: Env, kind: soroban_sdk::Symbol, dims: MetricDimensions) -> MetricValue {
+    pub fn read_metric(
+        _env: Env,
+        kind: soroban_sdk::Symbol,
+        dims: MetricDimensions,
+    ) -> MetricValue {
         assert_eq!(kind, symbol_short!("REC_CNT"));
         assert_eq!(dims.time_bucket, 42);
         assert_eq!(dims.region, Some(symbol_short!("NG")));

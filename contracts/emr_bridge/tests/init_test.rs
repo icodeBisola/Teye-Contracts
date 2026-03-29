@@ -108,16 +108,14 @@ fn test_register_provider_before_init_returns_not_initialized() {
 #[test]
 fn test_activate_provider_before_init_returns_not_initialized() {
     let (env, client, admin) = setup_uninit();
-    let result =
-        client.try_activate_provider(&admin, &String::from_str(&env, "p1"));
+    let result = client.try_activate_provider(&admin, &String::from_str(&env, "p1"));
     assert_eq!(result, Err(Ok(EmrBridgeError::NotInitialized)));
 }
 
 #[test]
 fn test_suspend_provider_before_init_returns_not_initialized() {
     let (env, client, admin) = setup_uninit();
-    let result =
-        client.try_suspend_provider(&admin, &String::from_str(&env, "p1"));
+    let result = client.try_suspend_provider(&admin, &String::from_str(&env, "p1"));
     assert_eq!(result, Err(Ok(EmrBridgeError::NotInitialized)));
 }
 
@@ -169,14 +167,8 @@ fn test_verify_sync_before_init_returns_not_initialized() {
     let (env, client, admin) = setup_uninit();
     let s = |v: &str| String::from_str(&env, v);
     let empty_vec: Vec<String> = Vec::new(&env);
-    let result = client.try_verify_sync(
-        &admin,
-        &s("v1"),
-        &s("ex1"),
-        &s("h1"),
-        &s("h2"),
-        &empty_vec,
-    );
+    let result =
+        client.try_verify_sync(&admin, &s("v1"), &s("ex1"), &s("h1"), &s("h2"), &empty_vec);
     assert_eq!(result, Err(Ok(EmrBridgeError::NotInitialized)));
 }
 
@@ -211,39 +203,34 @@ fn test_list_providers_returns_empty_before_any_registration() {
 #[test]
 fn test_get_patient_exchanges_returns_empty_on_fresh_contract() {
     let (env, client, _admin) = setup_uninit();
-    let exchanges =
-        client.get_patient_exchanges(&String::from_str(&env, "pat-999"));
+    let exchanges = client.get_patient_exchanges(&String::from_str(&env, "pat-999"));
     assert_eq!(exchanges.len(), 0);
 }
 
 #[test]
 fn test_get_provider_mappings_returns_empty_on_fresh_contract() {
     let (env, client, _admin) = setup_uninit();
-    let mappings =
-        client.get_provider_mappings(&String::from_str(&env, "p-999"));
+    let mappings = client.get_provider_mappings(&String::from_str(&env, "p-999"));
     assert_eq!(mappings.len(), 0);
 }
 
 #[test]
 fn test_get_provider_returns_not_found_on_fresh_contract() {
     let (env, client, _admin) = setup_uninit();
-    let result =
-        client.try_get_provider(&String::from_str(&env, "nonexistent"));
+    let result = client.try_get_provider(&String::from_str(&env, "nonexistent"));
     assert_eq!(result, Err(Ok(EmrBridgeError::ProviderNotFound)));
 }
 
 #[test]
 fn test_get_exchange_returns_not_found_on_fresh_contract() {
     let (env, client, _admin) = setup_uninit();
-    let result =
-        client.try_get_exchange(&String::from_str(&env, "nonexistent"));
+    let result = client.try_get_exchange(&String::from_str(&env, "nonexistent"));
     assert_eq!(result, Err(Ok(EmrBridgeError::ExchangeNotFound)));
 }
 
 #[test]
 fn test_get_verification_returns_not_found_on_fresh_contract() {
     let (env, client, _admin) = setup_uninit();
-    let result =
-        client.try_get_verification(&String::from_str(&env, "nonexistent"));
+    let result = client.try_get_verification(&String::from_str(&env, "nonexistent"));
     assert_eq!(result, Err(Ok(EmrBridgeError::VerificationNotFound)));
 }

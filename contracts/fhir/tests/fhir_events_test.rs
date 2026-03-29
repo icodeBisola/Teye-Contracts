@@ -29,13 +29,21 @@ fn setup() -> (Env, FhirContractClient<'static>, Address) {
 /// Returns the first event whose first topic matches `topic_name`.
 fn find_event<'a>(
     env: &'a Env,
-    events: &'a soroban_sdk::Vec<(soroban_sdk::Address, soroban_sdk::Vec<soroban_sdk::Val>, soroban_sdk::Val)>,
+    events: &'a soroban_sdk::Vec<(
+        soroban_sdk::Address,
+        soroban_sdk::Vec<soroban_sdk::Val>,
+        soroban_sdk::Val,
+    )>,
     topic_name: &str,
-) -> Option<(soroban_sdk::Address, soroban_sdk::Vec<soroban_sdk::Val>, soroban_sdk::Val)> {
+) -> Option<(
+    soroban_sdk::Address,
+    soroban_sdk::Vec<soroban_sdk::Val>,
+    soroban_sdk::Val,
+)> {
     let needle = Symbol::new(env, topic_name).into_val(env);
-    events.iter().find(|(_, topics, _)| {
-        topics.get(0).map(|t| t == needle).unwrap_or(false)
-    })
+    events
+        .iter()
+        .find(|(_, topics, _)| topics.get(0).map(|t| t == needle).unwrap_or(false))
 }
 
 // ── Resource lifecycle events ─────────────────────────────────────────────────
@@ -70,7 +78,10 @@ fn test_resource_updated_event_emitted() {
     let (env, client, admin) = setup();
 
     let resource_id = String::from_str(&env, "res-evt-002");
-    let v1 = String::from_str(&env, r#"{"resourceType":"Observation","status":"preliminary"}"#);
+    let v1 = String::from_str(
+        &env,
+        r#"{"resourceType":"Observation","status":"preliminary"}"#,
+    );
     let v2 = String::from_str(&env, r#"{"resourceType":"Observation","status":"final"}"#);
 
     client.register_resource(&admin, &resource_id, &v1);
@@ -285,10 +296,7 @@ fn test_no_events_on_read_only_call() {
     let _ = client.get_resource(&resource_id);
 
     let after = env.events().all();
-    assert!(
-        after.is_empty(),
-        "Read-only calls must not emit any events"
-    );
+    assert!(after.is_empty(), "Read-only calls must not emit any events");
 }
 
 // ── Multiple resources: each emits its own event ──────────────────────────────
@@ -305,12 +313,15 @@ fn test_multiple_registrations_each_emit_event() {
     }
 
     let events = env.events().all();
-    let reg_count = events.iter().filter(|(_, topics, _)| {
-        topics
-            .get(0)
-            .map(|t| t == Symbol::new(&env, "resource_registered").into_val(&env))
-            .unwrap_or(false)
-    }).count();
+    let reg_count = events
+        .iter()
+        .filter(|(_, topics, _)| {
+            topics
+                .get(0)
+                .map(|t| t == Symbol::new(&env, "resource_registered").into_val(&env))
+                .unwrap_or(false)
+        })
+        .count();
 
     assert_eq!(
         reg_count,

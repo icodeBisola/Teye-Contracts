@@ -1,7 +1,7 @@
 #![allow(clippy::unwrap_used)]
 
-use identity::{IdentityContract, IdentityContractClient, credential::CredentialError};
-use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env, BytesN};
+use identity::{credential::CredentialError, IdentityContract, IdentityContractClient};
+use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, BytesN, Env};
 
 #[test]
 fn test_expiry_bounds_timestamp_manipulation() {
@@ -22,10 +22,10 @@ fn test_expiry_bounds_timestamp_manipulation() {
     let resource_id = BytesN::from_array(&env, &[1u8; 32]);
     let proof_a = soroban_sdk::Bytes::new(&env);
     let public_inputs = soroban_sdk::Vec::new(&env);
-    
+
     // Expiry time is in the past compared to current ledger timestamp
     let expiry = start_time + 500;
-    
+
     // Verifier is not set, so it usually returns VerifierNotSet, but we are testing timestamp
     // For coverage, just calling the boundary is fine.
     let result = client.try_verify_zk_credential(
@@ -40,5 +40,8 @@ fn test_expiry_bounds_timestamp_manipulation() {
 
     // Depending on the order of checks in the contract, it might fail with Expired or VerifierNotSet.
     // Ensure we handled the call properly.
-    assert!(result.is_err(), "Timestamp manipulation did not reject expired credential");
+    assert!(
+        result.is_err(),
+        "Timestamp manipulation did not reject expired credential"
+    );
 }

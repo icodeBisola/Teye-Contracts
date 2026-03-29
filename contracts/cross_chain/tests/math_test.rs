@@ -2,13 +2,10 @@
 
 use cross_chain::{
     bridge::{export_record, import_record, AnchoredRoot, BridgeError},
-    relay,
-    StateRootAnchor,
+    relay, StateRootAnchor,
 };
 use soroban_sdk::{
-    contract, contractimpl, symbol_short,
-    testutils::Ledger as _,
-    BytesN, Env, Symbol,
+    contract, contractimpl, symbol_short, testutils::Ledger as _, BytesN, Env, Symbol,
 };
 
 const TTL_SAFETY_MARGIN: u32 = 600_000;
@@ -45,9 +42,10 @@ fn test_get_latest_root_handles_high_ledger_values_without_overflow() {
             &(symbol_short!("RELAYROOT"), chain_id.clone(), safe_sequence),
             &anchor,
         );
-        env.storage()
-            .persistent()
-            .set(&(symbol_short!("RELAYLST"), chain_id.clone()), &safe_sequence);
+        env.storage().persistent().set(
+            &(symbol_short!("RELAYLST"), chain_id.clone()),
+            &safe_sequence,
+        );
     });
 
     let latest = env

@@ -4,10 +4,7 @@
 //! when invoked by a random, unauthenticated address — mirroring the Soroban
 //! `require_auth` / `Unauthorized` access-control pattern.
 
-use soroban_sdk::{
-    testutils::Address as _,
-    Address, Env, String,
-};
+use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 use fhir::contract::{FhirContract, FhirContractClient};
 use fhir::errors::FhirError;
@@ -62,7 +59,10 @@ fn test_unauthenticated_cannot_update_resource() {
 
     // Register a resource as admin first.
     let resource_id = String::from_str(&env, "res-002");
-    let payload_v1 = String::from_str(&env, r#"{"resourceType":"Observation","status":"preliminary"}"#);
+    let payload_v1 = String::from_str(
+        &env,
+        r#"{"resourceType":"Observation","status":"preliminary"}"#,
+    );
     client.register_resource(&admin, &resource_id, &payload_v1);
 
     // Strip all auth, attempt update as stranger.

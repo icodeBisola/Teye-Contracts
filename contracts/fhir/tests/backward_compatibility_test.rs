@@ -1,11 +1,13 @@
 use fhir::{FhirContract, FhirContractClient};
-use soroban_sdk::{testutils::Address as _, Address, Bytes, Env, Map, String, Symbol, symbol_short, IntoVal};
+use soroban_sdk::{
+    symbol_short, testutils::Address as _, Address, Bytes, Env, IntoVal, Map, String, Symbol,
+};
 
 #[test]
 fn test_v1_resource_can_be_read_by_v2_logic() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(FhirContract, ());
     let client = FhirContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
@@ -32,7 +34,7 @@ fn test_v1_resource_can_be_read_by_v2_logic() {
 fn test_manual_rollback_visibility() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(FhirContract, ());
     let client = FhirContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
@@ -43,10 +45,10 @@ fn test_manual_rollback_visibility() {
     let payload = Bytes::from_slice(&env, b"content");
 
     client.register_resource(&admin, &id, &payload);
-    
+
     // Migration 1 -> 2
     client.migrate_resource(&admin, &id, &2);
-    
+
     // In our current simple contract, migrate_resource only supports forward.
     // If I wanted to test rollback, I would need a migrate_backward call.
 }

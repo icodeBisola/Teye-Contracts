@@ -156,7 +156,7 @@ fn test_cross_condition_data_leakage_prevention() {
     // Verify conditions are properly isolated
     let diabetes_result = client.get_metric(&kind, &diabetes_dims);
     assert_eq!(diabetes_result.count, 1);
-    
+
     // HIV and diabetes data should be completely separate
     assert_ne!(hiv_dims.condition, diabetes_dims.condition);
 }
@@ -340,7 +340,7 @@ fn test_complex_cross_query_attempts() {
 
     for (i, attempt_dims) in cross_attempts.iter_mut().enumerate() {
         let result = client.get_metric(&kind, attempt_dims);
-        
+
         // All cross-query attempts should return no data
         assert_eq!(result.count, 0, "Cross-query attempt {} should return no data", i);
         assert_eq!(result.sum, 0, "Cross-query attempt {} should return no sum", i);
@@ -432,7 +432,7 @@ fn test_trend_cross_query_isolation() {
     for i in 0..5 {
         let malicious_point = malicious_trend.get(i).unwrap();
         let legitimate_b_point = legitimate_trend_b.get(i).unwrap();
-        
+
         assert_eq!(malicious_point.time_bucket, legitimate_b_point.time_bucket);
         assert_eq!(malicious_point.value.count, legitimate_b_point.value.count);
     }
@@ -499,9 +499,13 @@ fn test_null_dimension_cross_queries() {
 
     for (i, query_dims) in cross_queries.iter().enumerate() {
         let result = client.get_metric(&kind, query_dims);
-        
+
         // Each query should only return data for that specific dimension combination
-        assert_eq!(result.count, 1, "Cross-query {} should return exactly 1 result", i);
+        assert_eq!(
+            result.count, 1,
+            "Cross-query {} should return exactly 1 result",
+            i
+        );
     }
 
     // Verify specific data is isolated

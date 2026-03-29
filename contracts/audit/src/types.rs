@@ -285,7 +285,11 @@ impl core::fmt::Display for AuditError {
             AuditError::InternalError(msg) => write!(f, "internal error: {msg}"),
             AuditError::SegmentNotFound => write!(f, "segment not found"),
             AuditError::SearchKeyNotSet => write!(f, "search key not set for segment"),
-            AuditError::OutOfOrderTimestamp { sequence, supplied, minimum } => write!(
+            AuditError::OutOfOrderTimestamp {
+                sequence,
+                supplied,
+                minimum,
+            } => write!(
                 f,
                 "entry {sequence} timestamp {supplied} is before minimum {minimum}"
             ),

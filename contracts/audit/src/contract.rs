@@ -1,5 +1,5 @@
 use soroban_sdk::{
-    contract, contractimpl, contracttype, contracterror, symbol_short, Address, Env, Error,
+    contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, Error,
     IntoVal, Symbol, Val, Vec,
 };
 

@@ -1,4 +1,4 @@
-use soroban_sdk::{Env, Address};
+use soroban_sdk::{Address, Env};
 
 use crate::contract::DelegationContract;
 use crate::contract::DelegationContractClient;

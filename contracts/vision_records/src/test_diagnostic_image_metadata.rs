@@ -1,13 +1,12 @@
-﻿//! Tests for diagnostic image metadata in the vision_records module.
+//! Tests for diagnostic image metadata in the vision_records module.
 //! Covers: metadata schema validation, diagnostic category indexing,
 //! and image access event logging for privacy auditing.
 #[cfg(test)]
 mod tests {
     use crate::examination::{
-        EyeExamination, FundusPhotography, IntraocularPressure, OptFundusPhotography,
-        OptRetinalImaging, OptVisualField, PhysicalMeasurement, RetinalImaging,
-        SlitLampFindings, VisualAcuity, OptPhysicalMeasurement,
-        get_examination, set_examination, remove_examination,
+        get_examination, remove_examination, set_examination, EyeExamination, FundusPhotography,
+        IntraocularPressure, OptFundusPhotography, OptPhysicalMeasurement, OptRetinalImaging,
+        OptVisualField, PhysicalMeasurement, RetinalImaging, SlitLampFindings, VisualAcuity,
     };
     use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
@@ -126,7 +125,10 @@ mod tests {
         let env = Env::default();
         let provider = Address::generate(&env);
         let mut exam = make_exam(&env, 3);
-        let hash = String::from_str(&env, "sha256:0000000000000000000000000000000000000000000000000000000000000000");
+        let hash = String::from_str(
+            &env,
+            "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        );
         exam.retina_imaging = OptRetinalImaging::Some(RetinalImaging {
             image_url: String::from_str(&env, "ipfs://Qm"),
             image_hash: hash.clone(),
@@ -256,7 +258,8 @@ mod tests {
         let env = Env::default();
         let provider = Address::generate(&env);
         let mut exam = make_exam(&env, 40);
-        exam.clinical_notes = String::from_str(&env, "DICOM: Glaucoma suspect, follow-up in 6 months");
+        exam.clinical_notes =
+            String::from_str(&env, "DICOM: Glaucoma suspect, follow-up in 6 months");
         set_examination(&env, &exam, &provider);
 
         let stored = get_examination(&env, 40).unwrap();

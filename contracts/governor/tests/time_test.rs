@@ -2,9 +2,13 @@
 
 extern crate std;
 
+use governor::proposal::{ProposalAction, ProposalPhase, ProposalType};
 use governor::{GovernorContract, GovernorContractClient};
-use governor::proposal::{ProposalAction, ProposalType, ProposalPhase};
-use soroban_sdk::{symbol_short, testutils::{Address as _, Ledger}, vec, Address, BytesN, Env, String, Vec};
+use soroban_sdk::{
+    symbol_short,
+    testutils::{Address as _, Ledger},
+    vec, Address, BytesN, Env, String, Vec,
+};
 
 fn setup() -> (Env, Address, GovernorContractClient<'static>, Address) {
     let env = Env::default();
@@ -51,9 +55,21 @@ fn test_discussion_to_voting_requires_time() {
     set_mock_stake(&env, &contract_id, &proposer, 5_000);
 
     let target = Address::generate(&env);
-    let actions = vec![&env, ProposalAction { target, function: symbol_short!("GOV_PRM"), params_hash: BytesN::from_array(&env, &[0u8;32]) }];
+    let actions = vec![
+        &env,
+        ProposalAction {
+            target,
+            function: symbol_short!("GOV_PRM"),
+            params_hash: BytesN::from_array(&env, &[0u8; 32]),
+        },
+    ];
 
-    let id = client.create_proposal(&proposer, &ProposalType::ParameterChange, &String::from_str(&env, "Time test"), &actions);
+    let id = client.create_proposal(
+        &proposer,
+        &ProposalType::ParameterChange,
+        &String::from_str(&env, "Time test"),
+        &actions,
+    );
 
     // Draft -> Discussion (immediate)
     client.advance_phase(&proposer, &id);
@@ -76,9 +92,21 @@ fn test_timelock_requires_timestamp_to_expire() {
     set_mock_stake(&env, &contract_id, &proposer, 250_000_000);
 
     let target = Address::generate(&env);
-    let actions = vec![&env, ProposalAction { target: target.clone(), function: symbol_short!("GOV_PRM"), params_hash: BytesN::from_array(&env, &[0u8;32]) }];
+    let actions = vec![
+        &env,
+        ProposalAction {
+            target: target.clone(),
+            function: symbol_short!("GOV_PRM"),
+            params_hash: BytesN::from_array(&env, &[0u8; 32]),
+        },
+    ];
 
-    let id = client.create_proposal(&proposer, &ProposalType::ParameterChange, &String::from_str(&env, "Timelock test"), &actions);
+    let id = client.create_proposal(
+        &proposer,
+        &ProposalType::ParameterChange,
+        &String::from_str(&env, "Timelock test"),
+        &actions,
+    );
 
     // Move to Discussion -> Voting
     client.advance_phase(&proposer, &id);
@@ -94,22 +122,30 @@ fn test_timelock_requires_timestamp_to_expire() {
     set_mock_age(&env, &contract_id, &v2, 365 * 86_400);
 
     // Commit & Reveal For votes
-    let salt1 = BytesN::from_array(&env, &[0xAA;32]);
-    let salt2 = BytesN::from_array(&env, &[0xBB;32]);
+    let salt1 = BytesN::from_array(&env, &[0xAA; 32]);
+    let salt2 = BytesN::from_array(&env, &[0xBB; 32]);
     let commit1 = {
         use soroban_sdk::Bytes;
         let mut data = Bytes::new(&env);
-        for b in id.to_le_bytes().iter() { data.push_back(*b); }
+        for b in id.to_le_bytes().iter() {
+            data.push_back(*b);
+        }
         data.push_back(0u8);
-        for i in 0..32u32 { data.push_back(salt1.get(i).unwrap_or(0)); }
+        for i in 0..32u32 {
+            data.push_back(salt1.get(i).unwrap_or(0));
+        }
         env.crypto().sha256(&data).into()
     };
     let commit2 = {
         use soroban_sdk::Bytes;
         let mut data = Bytes::new(&env);
-        for b in id.to_le_bytes().iter() { data.push_back(*b); }
+        for b in id.to_le_bytes().iter() {
+            data.push_back(*b);
+        }
         data.push_back(0u8);
-        for i in 0..32u32 { data.push_back(salt2.get(i).unwrap_or(0)); }
+        for i in 0..32u32 {
+            data.push_back(salt2.get(i).unwrap_or(0));
+        }
         env.crypto().sha256(&data).into()
     };
 

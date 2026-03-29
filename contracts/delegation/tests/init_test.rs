@@ -2,8 +2,8 @@
 
 extern crate std;
 
-use soroban_sdk::{testutils::Address as _, Address, Env};
 use delegation::{DelegationContract, DelegationContractClient};
+use soroban_sdk::{testutils::Address as _, Address, Env};
 
 #[test]
 fn test_initialization() {
@@ -16,7 +16,7 @@ fn test_initialization() {
     assert_eq!(client.get_admin(), None);
 
     let admin = Address::generate(&env);
-    
+
     client.initialize(&admin);
 
     assert_eq!(client.get_admin(), Some(admin.clone()));
@@ -33,6 +33,6 @@ fn test_double_initialization_panics() {
 
     let admin = Address::generate(&env);
     client.initialize(&admin);
-    
+
     client.initialize(&admin);
 }

@@ -68,7 +68,7 @@ fn test_delete_resource() {
 
     client.register_resource(&admin, &id, &payload);
     client.delete_resource(&admin, &id);
-    
+
     let result = client.try_get_resource(&id);
     assert!(result.is_err());
 }

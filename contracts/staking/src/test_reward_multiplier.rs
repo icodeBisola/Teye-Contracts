@@ -1,4 +1,4 @@
-﻿//! Tests for staking reward multiplier logic.
+//! Tests for staking reward multiplier logic.
 //! Covers: tier bonuses, lock-up period rewards, early withdrawal penalties,
 //! and reward accumulation correctness.
 #[cfg(test)]
@@ -6,8 +6,8 @@ mod tests {
     extern crate std;
     use crate::rewards::{compute_reward_per_token, earned, PRECISION};
     use crate::timelock::{
-        get_request, next_request_id, store_request, UnstakeRequest,
-        get_rate_proposal, store_rate_proposal, clear_rate_proposal, RateChangeProposal,
+        clear_rate_proposal, get_rate_proposal, get_request, next_request_id, store_rate_proposal,
+        store_request, RateChangeProposal, UnstakeRequest,
     };
     use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Address, Env};
 
@@ -132,8 +132,11 @@ mod tests {
         let unlock_at = 1000 + lock_period;
         let id = next_request_id(&env);
         let req = UnstakeRequest {
-            id, staker: Address::generate(&env),
-            amount: 1_000, unlock_at, withdrawn: false,
+            id,
+            staker: Address::generate(&env),
+            amount: 1_000,
+            unlock_at,
+            withdrawn: false,
         };
         store_request(&env, &req);
         // One second before unlock
@@ -149,8 +152,11 @@ mod tests {
         let unlock_at = 1000 + 86_400u64;
         let id = next_request_id(&env);
         let req = UnstakeRequest {
-            id, staker: Address::generate(&env),
-            amount: 1_000, unlock_at, withdrawn: false,
+            id,
+            staker: Address::generate(&env),
+            amount: 1_000,
+            unlock_at,
+            withdrawn: false,
         };
         store_request(&env, &req);
         env.ledger().set_timestamp(unlock_at);
@@ -163,8 +169,11 @@ mod tests {
         let env = Env::default();
         let id = next_request_id(&env);
         let mut req = UnstakeRequest {
-            id, staker: Address::generate(&env),
-            amount: 1_000, unlock_at: 0, withdrawn: false,
+            id,
+            staker: Address::generate(&env),
+            amount: 1_000,
+            unlock_at: 0,
+            withdrawn: false,
         };
         store_request(&env, &req);
         // Mark as withdrawn
@@ -234,7 +243,10 @@ mod tests {
     #[test]
     fn test_rate_change_proposal_stored_and_retrieved() {
         let env = Env::default();
-        let proposal = RateChangeProposal { new_rate: 20, effective_at: 5000 };
+        let proposal = RateChangeProposal {
+            new_rate: 20,
+            effective_at: 5000,
+        };
         store_rate_proposal(&env, &proposal);
         let loaded = get_rate_proposal(&env).expect("proposal not found");
         assert_eq!(loaded.new_rate, 20);
@@ -245,7 +257,10 @@ mod tests {
     fn test_rate_change_blocked_before_effective_at() {
         let env = Env::default();
         env.ledger().set_timestamp(1000);
-        let proposal = RateChangeProposal { new_rate: 20, effective_at: 5000 };
+        let proposal = RateChangeProposal {
+            new_rate: 20,
+            effective_at: 5000,
+        };
         store_rate_proposal(&env, &proposal);
         let loaded = get_rate_proposal(&env).unwrap();
         assert!(env.ledger().timestamp() < loaded.effective_at);
@@ -255,7 +270,10 @@ mod tests {
     fn test_rate_change_allowed_after_effective_at() {
         let env = Env::default();
         env.ledger().set_timestamp(5000);
-        let proposal = RateChangeProposal { new_rate: 20, effective_at: 5000 };
+        let proposal = RateChangeProposal {
+            new_rate: 20,
+            effective_at: 5000,
+        };
         store_rate_proposal(&env, &proposal);
         let loaded = get_rate_proposal(&env).unwrap();
         assert!(env.ledger().timestamp() >= loaded.effective_at);
@@ -264,7 +282,10 @@ mod tests {
     #[test]
     fn test_rate_proposal_cleared_after_apply() {
         let env = Env::default();
-        let proposal = RateChangeProposal { new_rate: 20, effective_at: 0 };
+        let proposal = RateChangeProposal {
+            new_rate: 20,
+            effective_at: 0,
+        };
         store_rate_proposal(&env, &proposal);
         assert!(get_rate_proposal(&env).is_some());
         clear_rate_proposal(&env);

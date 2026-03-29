@@ -1,6 +1,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use cross_chain::{CrossChainContract, CrossChainContractClient, CrossChainError, CrossChainMessage};
+use cross_chain::{
+    CrossChainContract, CrossChainContractClient, CrossChainError, CrossChainMessage,
+};
 use soroban_sdk::{
     contract, contracterror, contractimpl, symbol_short, testutils::Address as _, Address, Bytes,
     Env, String,
@@ -85,10 +87,14 @@ fn test_process_message_invokes_mock_contract_and_forwards_payload() {
     client.process_message(&relayer, &message_id, &message, &vision_id);
 
     let stored_patient: Address = env
-        .as_contract(&vision_id, || env.storage().instance().get(&symbol_short!("LAST_PAT")))
+        .as_contract(&vision_id, || {
+            env.storage().instance().get(&symbol_short!("LAST_PAT"))
+        })
         .expect("patient should be stored");
     let stored_payload: Bytes = env
-        .as_contract(&vision_id, || env.storage().instance().get(&symbol_short!("LAST_PAY")))
+        .as_contract(&vision_id, || {
+            env.storage().instance().get(&symbol_short!("LAST_PAY"))
+        })
         .expect("payload should be stored");
 
     assert_eq!(stored_patient, patient);
@@ -138,7 +144,9 @@ fn test_failed_external_call_does_not_mark_message_processed() {
     client.process_message(&relayer, &message_id, &succeeding, &vision_id);
 
     let stored_payload: Bytes = env
-        .as_contract(&vision_id, || env.storage().instance().get(&symbol_short!("LAST_PAY")))
+        .as_contract(&vision_id, || {
+            env.storage().instance().get(&symbol_short!("LAST_PAY"))
+        })
         .expect("payload should be stored after retry");
     assert_eq!(stored_payload, success_payload);
 }

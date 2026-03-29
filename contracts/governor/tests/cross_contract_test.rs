@@ -64,7 +64,12 @@ fn advance_time(env: &Env, secs: u64) {
 }
 
 /// Replicate the governor's commitment hash: SHA-256(proposal_id_le || choice_byte || salt).
-fn compute_commitment(env: &Env, proposal_id: u64, choice_byte: u8, salt: &BytesN<32>) -> BytesN<32> {
+fn compute_commitment(
+    env: &Env,
+    proposal_id: u64,
+    choice_byte: u8,
+    salt: &BytesN<32>,
+) -> BytesN<32> {
     use soroban_sdk::Bytes;
     let mut data = Bytes::new(env);
     for b in proposal_id.to_le_bytes().iter() {
@@ -107,8 +112,18 @@ fn drive_to_execution(
 
     client.commit_vote(&voter_a, &proposal_id, &commit_a);
     client.commit_vote(&voter_b, &proposal_id, &commit_b);
-    client.reveal_vote(&voter_a, &proposal_id, &governor::voting::VoteChoice::For, &salt_a);
-    client.reveal_vote(&voter_b, &proposal_id, &governor::voting::VoteChoice::For, &salt_b);
+    client.reveal_vote(
+        &voter_a,
+        &proposal_id,
+        &governor::voting::VoteChoice::For,
+        &salt_a,
+    );
+    client.reveal_vote(
+        &voter_b,
+        &proposal_id,
+        &governor::voting::VoteChoice::For,
+        &salt_b,
+    );
 
     // Voting → Timelock
     advance_time(env, 5 * 86_400 + 1);

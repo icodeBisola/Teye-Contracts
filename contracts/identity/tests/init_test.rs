@@ -24,7 +24,10 @@ fn test_pre_initialization_state() {
     // Calling guarded methods without initialization should return Unauthorized or NoActiveRecovery as appropriate
     let attacker = Address::generate(&env);
     let new_guard = Address::generate(&env);
-    assert_eq!(client.try_add_guardian(&attacker, &new_guard), Err(Ok(RecoveryError::Unauthorized)));
+    assert_eq!(
+        client.try_add_guardian(&attacker, &new_guard),
+        Err(Ok(RecoveryError::Unauthorized))
+    );
 }
 
 #[test]
@@ -44,7 +47,10 @@ fn test_initialize_sets_state_and_prevents_double_init() {
     assert_eq!(client.get_recovery_threshold(&owner), 0);
 
     // Double initialization must fail with AlreadyInitialized
-    assert_eq!(client.try_initialize(&Address::generate(&env)), Err(Ok(RecoveryError::AlreadyInitialized)));
+    assert_eq!(
+        client.try_initialize(&Address::generate(&env)),
+        Err(Ok(RecoveryError::AlreadyInitialized))
+    );
 }
 
 #[test]
@@ -61,6 +67,10 @@ fn test_double_reinitialization_exploits() {
     // Attempting to initialize the contract a second time
     let hacker = Address::generate(&env);
     let result = client.try_initialize(&hacker);
-    
-    assert_eq!(result, Err(Ok(RecoveryError::AlreadyInitialized)), "Double re-initialization exploits should revert");
+
+    assert_eq!(
+        result,
+        Err(Ok(RecoveryError::AlreadyInitialized)),
+        "Double re-initialization exploits should revert"
+    );
 }

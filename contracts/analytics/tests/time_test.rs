@@ -6,7 +6,9 @@ use analytics::{
     homomorphic::{PaillierPrivateKey, PaillierPublicKey},
     AnalyticsContract, AnalyticsContractClient, ContractError, MetricDimensions, MetricValue,
 };
-use soroban_sdk::{symbol_short, testutils::Address as _, testutils::Ledger as _, Address, Env, Vec};
+use soroban_sdk::{
+    symbol_short, testutils::Address as _, testutils::Ledger as _, Address, Env, Vec,
+};
 
 fn setup() -> (Env, AnalyticsContractClient<'static>, Address) {
     let env = Env::default();

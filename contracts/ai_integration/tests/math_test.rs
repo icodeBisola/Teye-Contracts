@@ -101,7 +101,10 @@ fn test_store_analysis_result_rejects_out_of_range_bps_values() {
         Err(Ok(AiIntegrationError::InvalidInput))
     );
 
-    assert_eq!(client.get_analysis_request(&request_id).status, RequestStatus::Pending);
+    assert_eq!(
+        client.get_analysis_request(&request_id).status,
+        RequestStatus::Pending
+    );
 }
 
 #[test]
@@ -142,5 +145,8 @@ fn test_request_counter_saturates_at_u64_max_instead_of_wrapping() {
     );
 
     assert_eq!(request_id, u64::MAX);
-    assert_eq!(client.get_analysis_request(&request_id).request_id, u64::MAX);
+    assert_eq!(
+        client.get_analysis_request(&request_id).request_id,
+        u64::MAX
+    );
 }

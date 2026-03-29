@@ -24,7 +24,8 @@ fn seg(name: &str) -> LogSegmentId {
 fn build_log(name: &str, n: u64) -> MerkleLog {
     let mut log = MerkleLog::new(seg(name));
     for i in 1..=n {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     log
 }
@@ -62,7 +63,10 @@ fn chain_verification_passes_for_subrange() {
 fn first_entry_chains_from_genesis_zero_hash() {
     let log = build_log("genesis", 3);
     let first = log.get_entry(1).unwrap();
-    assert_eq!(first.prev_hash, [0u8; 32], "first entry must chain from zero-hash");
+    assert_eq!(
+        first.prev_hash, [0u8; 32],
+        "first entry must chain from zero-hash"
+    );
 }
 
 #[test]
@@ -72,7 +76,8 @@ fn each_entry_chains_to_predecessor() {
         let prev = log.get_entry(seq - 1).unwrap();
         let curr = log.get_entry(seq).unwrap();
         assert_eq!(
-            curr.prev_hash, prev.entry_hash,
+            curr.prev_hash,
+            prev.entry_hash,
             "entry {} prev_hash must equal entry {} entry_hash",
             seq,
             seq - 1
@@ -86,13 +91,20 @@ fn entry_hash_is_deterministic() {
     let mut log_c = MerkleLog::new(seg("same"));
     let mut log_d = MerkleLog::new(seg("same"));
     for i in 1..=3 {
-        log_c.append(i * 1000, "alice", "read", "record:1", "ok").unwrap();
-        log_d.append(i * 1000, "alice", "read", "record:1", "ok").unwrap();
+        log_c
+            .append(i * 1000, "alice", "read", "record:1", "ok")
+            .unwrap();
+        log_d
+            .append(i * 1000, "alice", "read", "record:1", "ok")
+            .unwrap();
     }
     for seq in 1..=3 {
         let c = log_c.get_entry(seq).unwrap();
         let d = log_d.get_entry(seq).unwrap();
-        assert_eq!(c.entry_hash, d.entry_hash, "identical content must produce identical hashes");
+        assert_eq!(
+            c.entry_hash, d.entry_hash,
+            "identical content must produce identical hashes"
+        );
         assert_eq!(c.prev_hash, d.prev_hash);
     }
 }
@@ -102,12 +114,19 @@ fn different_content_produces_different_hashes() {
     let mut log_a = MerkleLog::new(seg("diff"));
     let mut log_b = MerkleLog::new(seg("diff"));
 
-    log_a.append(1000, "alice", "read", "record:1", "ok").unwrap();
-    log_b.append(1000, "alice", "write", "record:1", "ok").unwrap(); // different action
+    log_a
+        .append(1000, "alice", "read", "record:1", "ok")
+        .unwrap();
+    log_b
+        .append(1000, "alice", "write", "record:1", "ok")
+        .unwrap(); // different action
 
     let a = log_a.get_entry(1).unwrap();
     let b = log_b.get_entry(1).unwrap();
-    assert_ne!(a.entry_hash, b.entry_hash, "different content must produce different hashes");
+    assert_ne!(
+        a.entry_hash, b.entry_hash,
+        "different content must produce different hashes"
+    );
 }
 
 #[test]
@@ -115,8 +134,12 @@ fn different_timestamps_produce_different_hashes() {
     let mut log_a = MerkleLog::new(seg("ts"));
     let mut log_b = MerkleLog::new(seg("ts"));
 
-    log_a.append(1000, "actor", "action", "target", "ok").unwrap();
-    log_b.append(2000, "actor", "action", "target", "ok").unwrap();
+    log_a
+        .append(1000, "actor", "action", "target", "ok")
+        .unwrap();
+    log_b
+        .append(2000, "actor", "action", "target", "ok")
+        .unwrap();
 
     assert_ne!(
         log_a.get_entry(1).unwrap().entry_hash,
@@ -229,29 +252,36 @@ fn appending_entry_invalidates_old_proofs() {
 fn consistency_proof_verifies_for_growing_log() {
     let mut log = MerkleLog::new(seg("grow"));
     for i in 1..=4 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let root_4 = log.current_root();
 
     for i in 5..=8 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let hashes_8 = leaf_hashes(&log, 8);
 
     let prover = ConsistencyProver::new(hashes_8);
     let proof = prover.generate(root_4, 4).unwrap();
-    assert!(proof.verify().is_ok(), "consistency proof must verify for 4→8");
+    assert!(
+        proof.verify().is_ok(),
+        "consistency proof must verify for 4→8"
+    );
 }
 
 #[test]
 fn consistency_proof_detects_tampered_old_root() {
     let mut log = MerkleLog::new(seg("tamper-old-root"));
     for i in 1..=4 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
 
     for i in 5..=8 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let hashes_8 = leaf_hashes(&log, 8);
 
@@ -268,12 +298,14 @@ fn consistency_proof_detects_tampered_old_root() {
 fn consistency_proof_detects_tampered_proof_hash() {
     let mut log = MerkleLog::new(seg("tamper-proof-hash"));
     for i in 1..=4 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let root_4 = log.current_root();
 
     for i in 5..=8 {
-        log.append(i * 1000, "actor", "action", "target", "ok").unwrap();
+        log.append(i * 1000, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let hashes_8 = leaf_hashes(&log, 8);
 
@@ -296,19 +328,22 @@ fn consistency_proof_across_multiple_checkpoints() {
 
     // Checkpoint 1: 3 entries.
     for i in 1..=3 {
-        log.append(i * 1000, "admin", "create_segment", "seg:phi", "ok").unwrap();
+        log.append(i * 1000, "admin", "create_segment", "seg:phi", "ok")
+            .unwrap();
     }
     let root_3 = log.publish_root(3000);
 
     // Checkpoint 2: 7 entries.
     for i in 4..=7 {
-        log.append(i * 1000, "admin", "append", "seg:phi", "ok").unwrap();
+        log.append(i * 1000, "admin", "append", "seg:phi", "ok")
+            .unwrap();
     }
     let _root_7 = log.publish_root(7000);
 
     // Checkpoint 3: 12 entries.
     for i in 8..=12 {
-        log.append(i * 1000, "auditor", "review", "seg:phi", "ok").unwrap();
+        log.append(i * 1000, "auditor", "review", "seg:phi", "ok")
+            .unwrap();
     }
     let _root_12 = log.publish_root(12000);
 
@@ -364,7 +399,8 @@ fn retention_policy_prevents_premature_deletion() {
         requires_witness_for_deletion: false,
     });
 
-    log.append(1000, "admin", "create_segment", "seg:phi", "ok").unwrap();
+    log.append(1000, "admin", "create_segment", "seg:phi", "ok")
+        .unwrap();
 
     // Try to compact before retention period expires.
     let result = log.compact(1, 1, 1000 + 86_399, 0);
@@ -393,7 +429,10 @@ fn sensitive_segment_requires_witnesses_for_deletion() {
     let result = log.compact(1, 1, 2000, 2);
     assert!(matches!(
         result,
-        Err(AuditError::InsufficientWitnesses { required: 2, present: 0 })
+        Err(AuditError::InsufficientWitnesses {
+            required: 2,
+            present: 0
+        })
     ));
 }
 
@@ -443,9 +482,24 @@ fn compaction_succeeds_with_sufficient_witnesses() {
 fn admin_actions_are_logged_with_correct_fields() {
     let mut log = MerkleLog::new(seg("admin-audit"));
 
-    log.append(1000, "admin:0xABCD", "segment.create", "seg:phi_records", "ok").unwrap();
-    log.append(2000, "admin:0xABCD", "retention.set", "seg:phi_records", "ok").unwrap();
-    log.append(3000, "admin:0xABCD", "witness.add", "checkpoint:1", "ok").unwrap();
+    log.append(
+        1000,
+        "admin:0xABCD",
+        "segment.create",
+        "seg:phi_records",
+        "ok",
+    )
+    .unwrap();
+    log.append(
+        2000,
+        "admin:0xABCD",
+        "retention.set",
+        "seg:phi_records",
+        "ok",
+    )
+    .unwrap();
+    log.append(3000, "admin:0xABCD", "witness.add", "checkpoint:1", "ok")
+        .unwrap();
 
     let e1 = log.get_entry(1).unwrap();
     assert_eq!(e1.actor, "admin:0xABCD");
@@ -463,10 +517,14 @@ fn admin_actions_are_logged_with_correct_fields() {
 fn admin_actions_are_tamper_evident_via_chain() {
     let mut log = MerkleLog::new(seg("admin-tamper"));
 
-    log.append(1000, "admin", "initialize", "contract", "ok").unwrap();
-    log.append(2000, "admin", "create_segment", "seg:audit", "ok").unwrap();
-    log.append(3000, "admin", "set_retention", "seg:audit", "ok").unwrap();
-    log.append(4000, "admin", "compact", "seg:audit:1-5", "ok").unwrap();
+    log.append(1000, "admin", "initialize", "contract", "ok")
+        .unwrap();
+    log.append(2000, "admin", "create_segment", "seg:audit", "ok")
+        .unwrap();
+    log.append(3000, "admin", "set_retention", "seg:audit", "ok")
+        .unwrap();
+    log.append(4000, "admin", "compact", "seg:audit:1-5", "ok")
+        .unwrap();
 
     // Full chain verification passes.
     assert!(log.verify_chain(1, 4).is_ok());
@@ -508,11 +566,14 @@ fn admin_compaction_is_itself_auditable() {
     let mut log = MerkleLog::new(seg("audit-compaction"));
 
     // Original data entries.
-    log.append(1000, "user:01", "record.create", "patient:01", "ok").unwrap();
-    log.append(2000, "user:02", "record.read", "patient:01", "ok").unwrap();
+    log.append(1000, "user:01", "record.create", "patient:01", "ok")
+        .unwrap();
+    log.append(2000, "user:02", "record.read", "patient:01", "ok")
+        .unwrap();
 
     // Admin performs compaction — log the compaction event first.
-    log.append(3000, "admin", "compact", "seq:1-2", "initiated").unwrap();
+    log.append(3000, "admin", "compact", "seq:1-2", "initiated")
+        .unwrap();
 
     let root_before = log.current_root();
 
@@ -676,10 +737,14 @@ fn end_to_end_tamper_resistance_scenario() {
     let mut log = MerkleLog::new(seg("e2e"));
 
     // Phase 1: Admin initializes and creates entries.
-    log.append(1000, "admin", "initialize", "contract", "ok").unwrap();
-    log.append(2000, "admin", "create_segment", "seg:phi", "ok").unwrap();
-    log.append(3000, "clinician", "record.create", "patient:01", "ok").unwrap();
-    log.append(4000, "clinician", "record.read", "patient:01", "ok").unwrap();
+    log.append(1000, "admin", "initialize", "contract", "ok")
+        .unwrap();
+    log.append(2000, "admin", "create_segment", "seg:phi", "ok")
+        .unwrap();
+    log.append(3000, "clinician", "record.create", "patient:01", "ok")
+        .unwrap();
+    log.append(4000, "clinician", "record.read", "patient:01", "ok")
+        .unwrap();
 
     // Phase 2: Publish root as tamper-evidence beacon.
     let root_4 = log.publish_root(4000);
@@ -698,10 +763,14 @@ fn end_to_end_tamper_resistance_scenario() {
     }
 
     // Phase 5: More entries arrive.
-    log.append(5000, "admin", "retention.set", "seg:phi", "ok").unwrap();
-    log.append(6000, "researcher", "data.export", "patient:01", "ok").unwrap();
-    log.append(7000, "admin", "review.approve", "export:1", "ok").unwrap();
-    log.append(8000, "admin", "audit.review", "seg:phi", "ok").unwrap();
+    log.append(5000, "admin", "retention.set", "seg:phi", "ok")
+        .unwrap();
+    log.append(6000, "researcher", "data.export", "patient:01", "ok")
+        .unwrap();
+    log.append(7000, "admin", "review.approve", "export:1", "ok")
+        .unwrap();
+    log.append(8000, "admin", "audit.review", "seg:phi", "ok")
+        .unwrap();
 
     let hashes_8 = leaf_hashes(&log, 8);
 

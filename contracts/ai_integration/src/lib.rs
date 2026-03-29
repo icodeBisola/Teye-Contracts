@@ -290,8 +290,10 @@ impl AiIntegrationContract {
 
         let key = (REQUEST_KEY, counter);
         env.storage().persistent().set(&key, &request);
-        env.events()
-            .publish((EVT_REQUEST_SUBMITTED, counter, provider_id), request.clone());
+        env.events().publish(
+            (EVT_REQUEST_SUBMITTED, counter, provider_id),
+            request.clone(),
+        );
 
         Ok(counter)
     }
