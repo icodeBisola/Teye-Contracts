@@ -85,7 +85,12 @@ fn setup() -> TestFixture {
     let fhir_client = FhirContractClient::new(&env, &fhir_id);
     fhir_client.initialize(&admin, &registry_id);
 
-    TestFixture { env, fhir_client, registry_id, admin }
+    TestFixture {
+        env,
+        fhir_client,
+        registry_id,
+        admin,
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -96,7 +101,9 @@ fn setup() -> TestFixture {
 /// from the external registry in a well-formed state.
 #[test]
 fn test_cross_contract_fetch_record_success() {
-    let TestFixture { env, fhir_client, .. } = setup();
+    let TestFixture {
+        env, fhir_client, ..
+    } = setup();
 
     let record_id: u64 = 42;
     let result = fhir_client.try_fetch_and_store_record(&record_id);
@@ -108,14 +115,22 @@ fn test_cross_contract_fetch_record_success() {
 
     // The record should now be readable through the FHIR contract itself.
     let stored = fhir_client.get_record(&record_id);
-    assert!(!stored.is_empty(), "Stored record must be non-empty after a successful fetch");
+    assert!(
+        !stored.is_empty(),
+        "Stored record must be non-empty after a successful fetch"
+    );
 }
 
 /// When the registry returns a record, the FHIR contract forwards the exact
 /// same bytes without mutation (integrity check).
 #[test]
 fn test_cross_contract_record_integrity() {
-    let TestFixture { env, fhir_client, registry_id, .. } = setup();
+    let TestFixture {
+        env,
+        fhir_client,
+        registry_id,
+        ..
+    } = setup();
 
     let record_id: u64 = 7;
 
@@ -136,7 +151,12 @@ fn test_cross_contract_record_integrity() {
 /// stored independently (no cross-contamination between record slots).
 #[test]
 fn test_cross_contract_multiple_records_independent() {
-    let TestFixture { env, fhir_client, registry_id, .. } = setup();
+    let TestFixture {
+        env,
+        fhir_client,
+        registry_id,
+        ..
+    } = setup();
 
     let ids: [u64; 3] = [1, 2, 3];
     for &id in &ids {
@@ -147,7 +167,11 @@ fn test_cross_contract_multiple_records_independent() {
     for &id in &ids {
         let expected = registry_client.get_record(&id);
         let stored = fhir_client.get_record(&id);
-        assert_eq!(stored, expected, "Record {} must match the registry payload", id);
+        assert_eq!(
+            stored, expected,
+            "Record {} must match the registry payload",
+            id
+        );
     }
 }
 
@@ -257,7 +281,9 @@ fn test_cross_contract_unset_registry_address_reverts() {
 /// either succeeds (overwrite) or surfaces a meaningful error, not a panic.
 #[test]
 fn test_cross_contract_duplicate_fetch_idempotent() {
-    let TestFixture { env, fhir_client, .. } = setup();
+    let TestFixture {
+        env, fhir_client, ..
+    } = setup();
 
     let record_id: u64 = 10;
 
@@ -274,6 +300,9 @@ fn test_cross_contract_duplicate_fetch_idempotent() {
     // If it succeeded, the stored data must still match the registry.
     if result.is_ok() {
         let second_stored = fhir_client.get_record(&record_id);
-        assert_eq!(first_stored, second_stored, "Idempotent overwrite must produce identical data");
+        assert_eq!(
+            first_stored, second_stored,
+            "Idempotent overwrite must produce identical data"
+        );
     }
 }

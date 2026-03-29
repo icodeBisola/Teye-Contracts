@@ -311,8 +311,18 @@ fn test_explicit_grant_scoped_to_individual_user() {
     let staff_a = Address::generate(&env);
     let staff_b = Address::generate(&env);
 
-    client.register_user(&admin, &staff_a, &Role::Staff, &String::from_str(&env, "StaffA"));
-    client.register_user(&admin, &staff_b, &Role::Staff, &String::from_str(&env, "StaffB"));
+    client.register_user(
+        &admin,
+        &staff_a,
+        &Role::Staff,
+        &String::from_str(&env, "StaffA"),
+    );
+    client.register_user(
+        &admin,
+        &staff_b,
+        &Role::Staff,
+        &String::from_str(&env, "StaffB"),
+    );
 
     // Both Staff users cannot write records via their base role.
     assert!(!client.check_permission(&staff_a, &Permission::WriteRecord));
@@ -387,8 +397,18 @@ fn test_grant_record_access_nonexistent_record_fails() {
     let patient = Address::generate(&env);
     let doctor = Address::generate(&env);
 
-    client.register_user(&admin, &patient, &Role::Patient, &String::from_str(&env, "Patient"));
-    client.register_user(&admin, &doctor, &Role::Optometrist, &String::from_str(&env, "Doctor"));
+    client.register_user(
+        &admin,
+        &patient,
+        &Role::Patient,
+        &String::from_str(&env, "Patient"),
+    );
+    client.register_user(
+        &admin,
+        &doctor,
+        &Role::Optometrist,
+        &String::from_str(&env, "Doctor"),
+    );
 
     let result = client.try_grant_record_access(
         &patient,

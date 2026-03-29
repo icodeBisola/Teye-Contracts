@@ -41,7 +41,12 @@ fn setup() -> Setup<'static> {
     );
     client.activate_provider(&admin, &provider_id);
 
-    Setup { env, client, admin, provider_id }
+    Setup {
+        env,
+        client,
+        admin,
+        provider_id,
+    }
 }
 
 // ── 1. FHIR JSON → on-chain state ────────────────────────────────────────────
@@ -82,7 +87,10 @@ fn test_fhir_observation_resource_stored_on_chain() {
         &String::from_str(&s.env, "sha256:observation-resource-hash"),
     );
 
-    assert_eq!(record.resource_type, String::from_str(&s.env, "Observation"));
+    assert_eq!(
+        record.resource_type,
+        String::from_str(&s.env, "Observation")
+    );
     assert_eq!(record.provider_id, s.provider_id);
 }
 
@@ -164,9 +172,21 @@ fn test_fhir_field_mappings_indexed_under_provider() {
     let s = setup();
 
     let fhir_fields = [
-        ("map-obs-value", "Observation.valueQuantity.value", "teye.metric.value"),
-        ("map-obs-unit", "Observation.valueQuantity.unit", "teye.metric.unit"),
-        ("map-cond-code", "Condition.code.coding[0].code", "teye.condition.icd10"),
+        (
+            "map-obs-value",
+            "Observation.valueQuantity.value",
+            "teye.metric.value",
+        ),
+        (
+            "map-obs-unit",
+            "Observation.valueQuantity.unit",
+            "teye.metric.unit",
+        ),
+        (
+            "map-cond-code",
+            "Condition.code.coding[0].code",
+            "teye.condition.icd10",
+        ),
     ];
 
     for (id, src, tgt) in fhir_fields {
@@ -194,7 +214,10 @@ fn test_patient_id_stored_is_pseudonymous_hash() {
     let s = setup();
 
     // Pseudonymous patient ID derived from SHA-256(NHS:1234567890)
-    let pseudo_id = String::from_str(&s.env, "sha256:b94f6f125c79e3a5ffaa826f584c10d52ada669e6762051b826b55776d05a886");
+    let pseudo_id = String::from_str(
+        &s.env,
+        "sha256:b94f6f125c79e3a5ffaa826f584c10d52ada669e6762051b826b55776d05a886",
+    );
 
     s.client.record_data_exchange(
         &s.admin,
@@ -207,7 +230,9 @@ fn test_patient_id_stored_is_pseudonymous_hash() {
         &String::from_str(&s.env, "sha256:record-hash"),
     );
 
-    let stored = s.client.get_exchange(&String::from_str(&s.env, "ex-anon-001"));
+    let stored = s
+        .client
+        .get_exchange(&String::from_str(&s.env, "ex-anon-001"));
 
     // The stored patient_id is the pseudonym — not a raw identifier.
     assert_eq!(stored.patient_id, pseudo_id);
@@ -406,7 +431,10 @@ fn test_sync_verification_mismatched_hashes_marks_partial_success() {
     );
 
     let mut discrepancies = Vec::new(&s.env);
-    discrepancies.push_back(String::from_str(&s.env, "Observation.status field mismatch"));
+    discrepancies.push_back(String::from_str(
+        &s.env,
+        "Observation.status field mismatch",
+    ));
 
     let verification = s.client.verify_sync(
         &s.admin,
@@ -443,13 +471,18 @@ fn test_field_mapping_fully_reconstructed_from_ledger() {
         &rule,
     );
 
-    let retrieved = s.client.get_field_mapping(&String::from_str(&s.env, "map-bp-systolic"));
+    let retrieved = s
+        .client
+        .get_field_mapping(&String::from_str(&s.env, "map-bp-systolic"));
 
     assert_eq!(retrieved.source_field, source);
     assert_eq!(retrieved.target_field, target);
     assert_eq!(retrieved.transform_rule, rule);
     assert_eq!(retrieved.provider_id, s.provider_id);
-    assert_eq!(retrieved.mapping_id, String::from_str(&s.env, "map-bp-systolic"));
+    assert_eq!(
+        retrieved.mapping_id,
+        String::from_str(&s.env, "map-bp-systolic")
+    );
 }
 
 /// The sync verification record itself is reconstructible from the ledger
@@ -471,7 +504,10 @@ fn test_sync_verification_reconstructed_from_ledger() {
     );
 
     let mut discrepancies = Vec::new(&s.env);
-    discrepancies.push_back(String::from_str(&s.env, "DiagnosticReport.result count differs"));
+    discrepancies.push_back(String::from_str(
+        &s.env,
+        "DiagnosticReport.result count differs",
+    ));
     discrepancies.push_back(String::from_str(&s.env, "DiagnosticReport.status mismatch"));
 
     s.client.verify_sync(
@@ -483,14 +519,17 @@ fn test_sync_verification_reconstructed_from_ledger() {
         &discrepancies,
     );
 
-    let retrieved = s.client.get_verification(&String::from_str(&s.env, "v-audit-001"));
+    let retrieved = s
+        .client
+        .get_verification(&String::from_str(&s.env, "v-audit-001"));
 
     assert_eq!(retrieved.exchange_id, exchange_id);
     assert!(!retrieved.is_consistent);
     assert_eq!(retrieved.discrepancies.len(), 2);
-    assert!(retrieved.discrepancies.contains(
-        &String::from_str(&s.env, "DiagnosticReport.result count differs")
-    ));
+    assert!(retrieved.discrepancies.contains(&String::from_str(
+        &s.env,
+        "DiagnosticReport.result count differs"
+    )));
 }
 
 /// Duplicate exchange IDs are rejected — FHIR records cannot overwrite

@@ -1,11 +1,13 @@
 use fhir::{FhirContract, FhirContractClient};
-use soroban_sdk::{testutils::Address as _, Address, Bytes, Env, Map, String, Symbol, symbol_short};
+use soroban_sdk::{
+    symbol_short, testutils::Address as _, Address, Bytes, Env, Map, String, Symbol,
+};
 
 #[test]
 fn test_forward_migration() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(FhirContract, ());
     let client = FhirContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
@@ -32,7 +34,7 @@ fn test_forward_migration() {
 fn test_lazy_migration() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let contract_id = env.register(FhirContract, ());
     let client = FhirContractClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
@@ -46,7 +48,7 @@ fn test_lazy_migration() {
     client.register_resource(&admin, &id, &payload);
 
     // get_resource should automatically trigger lazy migration if CURRENT_VERSION > 1
-    // In our case, we manually registered a migration 1->2. 
+    // In our case, we manually registered a migration 1->2.
     // If we assume CURRENT_VERSION is at least 2, lazy migration should happen.
     let retrieved = client.get_resource(&id);
     assert_eq!(retrieved, payload);

@@ -619,7 +619,9 @@ mod tests {
     #[test]
     fn single_entry_root_is_leaf_hash() {
         let mut log = MerkleLog::new(seg());
-        let seq = log.append(1_000, "alice", "create", "record:1", "ok").unwrap();
+        let seq = log
+            .append(1_000, "alice", "create", "record:1", "ok")
+            .unwrap();
         assert_eq!(seq, 1);
 
         let root = log.current_root();

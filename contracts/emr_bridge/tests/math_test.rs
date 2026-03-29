@@ -156,8 +156,7 @@ fn test_timestamp_near_max_boundary() {
 fn test_sequential_timestamp_overflow_handling() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "sequential-provider");
+    let provider_id = register_and_activate_provider(&env, &client, &admin, "sequential-provider");
     let patient_id = String::from_str(&env, "sequential-pat");
 
     // Create exchanges at different timestamps including boundaries
@@ -224,7 +223,8 @@ fn test_ttl_extreme_boundary_values() {
 fn test_large_patient_exchange_count() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id = register_and_activate_provider(&env, &client, &admin, "many-exchange-provider");
+    let provider_id =
+        register_and_activate_provider(&env, &client, &admin, "many-exchange-provider");
     let patient_id = String::from_str(&env, "many-exchange-pat");
 
     // Create many exchanges to test vector growth
@@ -262,8 +262,7 @@ fn test_large_patient_exchange_count() {
 fn test_empty_field_in_mapping_underflow() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "empty-field-provider");
+    let provider_id = register_and_activate_provider(&env, &client, &admin, "empty-field-provider");
 
     let mapping_id = String::from_str(&env, "empty-field-map");
     let source_field = String::from_str(&env, "");
@@ -287,7 +286,8 @@ fn test_empty_field_in_mapping_underflow() {
 fn test_hash_consistency_at_numeric_boundaries() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id = register_and_activate_provider(&env, &client, &admin, "hash-boundary-provider");
+    let provider_id =
+        register_and_activate_provider(&env, &client, &admin, "hash-boundary-provider");
 
     // Create exchange with hash representing max value
     let exchange_id = String::from_str(&env, "hash-boundary-ex");
@@ -466,8 +466,7 @@ fn test_verification_with_many_discrepancies() {
 fn test_timestamp_consistency_across_operations() {
     let (env, client, admin) = setup_bridge();
 
-    let provider_id =
-        register_and_activate_provider(&env, &client, &admin, "monotonic-provider");
+    let provider_id = register_and_activate_provider(&env, &client, &admin, "monotonic-provider");
 
     // Set specific controlled timestamps
     let ts1 = 1000u64;

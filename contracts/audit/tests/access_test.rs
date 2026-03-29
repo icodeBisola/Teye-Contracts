@@ -19,5 +19,8 @@ fn test_create_segment_unauthenticated_fails() {
 
     let segment = Symbol::short("UNAUTH");
     let result = client.try_create_segment(&segment);
-    assert!(result.is_err(), "create_segment without admin auth must fail");
+    assert!(
+        result.is_err(),
+        "create_segment without admin auth must fail"
+    );
 }

@@ -1,7 +1,7 @@
-use compliance::breach_detector::{AccessEvent, BreachDetector, BreachDetectorConfig, AlertType};
+use compliance::breach_detector::{AccessEvent, AlertType, BreachDetector, BreachDetectorConfig};
+use compliance::gdpr::register_gdpr_rules;
 use compliance::gdpr::{ErasureManager, ErasureRequest};
 use compliance::hipaa::register_hipaa_rules;
-use compliance::gdpr::register_gdpr_rules;
 use compliance::retention::RetentionManager;
 use compliance::rules_engine::{Jurisdiction, OperationContext, RulesEngine};
 use std::collections::HashMap;
@@ -589,7 +589,9 @@ fn breach_detector_after_hours_phi_triggers_alert() {
         success: true,
     };
     let alerts = detector.record_event(event);
-    assert!(alerts.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 }
 
 #[test]
@@ -598,7 +600,9 @@ fn breach_detector_within_hours_no_after_hours_alert() {
 
     let event = normal_access_event(12 * ONE_HOUR); // noon
     let alerts = detector.record_event(event);
-    assert!(!alerts.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(!alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 }
 
 #[test]
@@ -608,12 +612,16 @@ fn breach_detector_work_hours_boundary() {
     // Hour 6 (start of work hours) — no alert.
     let event_6 = normal_access_event(6 * ONE_HOUR);
     let alerts_6 = detector.record_event(event_6);
-    assert!(!alerts_6.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(!alerts_6
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 
     // Hour 22 (end of work hours) — alert.
     let event_22 = normal_access_event(22 * ONE_HOUR);
     let alerts_22 = detector.record_event(event_22);
-    assert!(alerts_22.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(alerts_22
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 }
 
 #[test]
@@ -628,17 +636,23 @@ fn breach_detector_custom_work_hours() {
     // Hour 8 (before custom start) — alert.
     let event_8 = normal_access_event(8 * ONE_HOUR);
     let alerts = detector.record_event(event_8);
-    assert!(alerts.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 
     // Hour 12 (within custom hours) — no alert.
     let event_12 = normal_access_event(12 * ONE_HOUR);
     let alerts = detector.record_event(event_12);
-    assert!(!alerts.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(!alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 
     // Hour 17 (custom end) — alert.
     let event_17 = normal_access_event(17 * ONE_HOUR);
     let alerts = detector.record_event(event_17);
-    assert!(alerts.iter().any(|a| a.alert_type == AlertType::AfterHoursAccess));
+    assert!(alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AfterHoursAccess));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -718,7 +732,10 @@ fn hour_calculation_wraps_correctly_across_days() {
     let ts_night = 10 * ONE_DAY + 3 * ONE_HOUR;
     let ctx_night = compliant_us_ctx(ts_night);
     let verdict_night = engine.evaluate(&ctx_night);
-    assert!(verdict_night.violations.iter().any(|v| v.rule_id == "HIPAA-003"));
+    assert!(verdict_night
+        .violations
+        .iter()
+        .any(|v| v.rule_id == "HIPAA-003"));
 }
 
 #[test]
@@ -778,12 +795,17 @@ fn breach_detector_events_expire_from_sliding_window() {
         event.actor = "user_a".into();
         detector.record_event(event);
     }
-    assert!(!detector.alerts().iter().any(|a| a.alert_type == AlertType::AccessSpike));
+    assert!(!detector
+        .alerts()
+        .iter()
+        .any(|a| a.alert_type == AlertType::AccessSpike));
 
     // 1 more event 2 hours later — the old events are outside the 1-hour window.
     let mut late_event = normal_access_event(base_ts + 2 * ONE_HOUR);
     late_event.actor = "user_a".into();
     let alerts = detector.record_event(late_event);
     // Only 1 event in the new window, well below threshold.
-    assert!(!alerts.iter().any(|a| a.alert_type == AlertType::AccessSpike));
+    assert!(!alerts
+        .iter()
+        .any(|a| a.alert_type == AlertType::AccessSpike));
 }

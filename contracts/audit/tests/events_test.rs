@@ -5,10 +5,7 @@
 //! that Merkle inclusion proofs validate against the current root, and that
 //! the root is updated deterministically after every append.
 
-use audit::{
-    merkle_log::MerkleLog,
-    types::LogSegmentId,
-};
+use audit::{merkle_log::MerkleLog, types::LogSegmentId};
 
 // ── Hash-chain linkage ────────────────────────────────────────────────────────
 
@@ -16,11 +13,12 @@ use audit::{
 fn test_first_entry_prev_hash_is_zero() {
     let seg = LogSegmentId::new("chain-init").unwrap();
     let mut log = MerkleLog::new(seg);
-    let seq = log.append(1_000, "alice", "read", "record:1", "ok").unwrap();
+    let seq = log
+        .append(1_000, "alice", "read", "record:1", "ok")
+        .unwrap();
     let entry = log.get_entry(seq).expect("entry must exist");
     assert_eq!(
-        entry.prev_hash,
-        [0u8; 32],
+        entry.prev_hash, [0u8; 32],
         "first entry prev_hash must be all-zero sentinel"
     );
 }
@@ -29,7 +27,9 @@ fn test_first_entry_prev_hash_is_zero() {
 fn test_second_entry_prev_hash_links_to_first() {
     let seg = LogSegmentId::new("chain-link").unwrap();
     let mut log = MerkleLog::new(seg);
-    let seq1 = log.append(1_000, "alice", "write", "record:1", "ok").unwrap();
+    let seq1 = log
+        .append(1_000, "alice", "write", "record:1", "ok")
+        .unwrap();
     let seq2 = log.append(1_001, "bob", "read", "record:1", "ok").unwrap();
     let entry1 = log.get_entry(seq1).expect("entry 1 must exist");
     let entry2 = log.get_entry(seq2).expect("entry 2 must exist");
@@ -44,7 +44,8 @@ fn test_hash_chain_across_many_entries() {
     let seg = LogSegmentId::new("chain-long").unwrap();
     let mut log = MerkleLog::new(seg);
     for i in 0..8u64 {
-        log.append(1_000 + i, "actor", "action", "target", "ok").unwrap();
+        log.append(1_000 + i, "actor", "action", "target", "ok")
+            .unwrap();
     }
     // verify_chain should confirm an unbroken chain over all 8 entries.
     assert!(
@@ -60,7 +61,8 @@ fn test_root_changes_with_each_append() {
     let seg = LogSegmentId::new("root-change").unwrap();
     let mut log = MerkleLog::new(seg);
     let root0 = log.current_root();
-    log.append(1_000, "alice", "read", "record:1", "ok").unwrap();
+    log.append(1_000, "alice", "read", "record:1", "ok")
+        .unwrap();
     let root1 = log.current_root();
     log.append(1_001, "bob", "write", "record:2", "ok").unwrap();
     let root2 = log.current_root();
@@ -87,7 +89,9 @@ fn test_same_content_different_timestamp_yields_different_root() {
 fn test_inclusion_proof_verifies_for_single_entry() {
     let seg = LogSegmentId::new("proof-single").unwrap();
     let mut log = MerkleLog::new(seg);
-    let seq = log.append(1_000, "alice", "read", "record:1", "ok").unwrap();
+    let seq = log
+        .append(1_000, "alice", "read", "record:1", "ok")
+        .unwrap();
     let root = log.current_root();
     let proof = log.inclusion_proof(seq).expect("proof must exist");
     assert!(
@@ -102,7 +106,10 @@ fn test_inclusion_proofs_verify_for_all_entries() {
     let mut log = MerkleLog::new(seg);
     let mut seqs = vec![];
     for i in 0..6u64 {
-        seqs.push(log.append(1_000 + i, "actor", "action", "target", "ok").unwrap());
+        seqs.push(
+            log.append(1_000 + i, "actor", "action", "target", "ok")
+                .unwrap(),
+        );
     }
     let root = log.current_root();
     for seq in seqs {
@@ -138,7 +145,8 @@ fn test_query_range_returns_correct_entries() {
     let seg = LogSegmentId::new("range-test").unwrap();
     let mut log = MerkleLog::new(seg);
     for i in 0..5u64 {
-        log.append(1_000 + i, "actor", "action", "target", "ok").unwrap();
+        log.append(1_000 + i, "actor", "action", "target", "ok")
+            .unwrap();
     }
     let range = log.query_range(2, 4);
     assert_eq!(range.len(), 3, "range [2, 4] must return 3 entries");

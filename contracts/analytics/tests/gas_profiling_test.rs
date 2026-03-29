@@ -25,7 +25,11 @@ use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Vec};
 
 // ── Shared keys ───────────────────────────────────────────────────────────────
 
-const PUB_KEY: PaillierPublicKey = PaillierPublicKey { n: 33, nn: 1089, g: 34 };
+const PUB_KEY: PaillierPublicKey = PaillierPublicKey {
+    n: 33,
+    nn: 1089,
+    g: 34,
+};
 const PRIV_KEY: PaillierPrivateKey = PaillierPrivateKey { lambda: 20, mu: 5 };
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -154,7 +158,14 @@ fn bench_get_trend_single_bucket() {
 
     let kind = symbol_short!("REC_CNT");
     measure(&env, "get_trend_1_bucket", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &3_000, &3_000);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &3_000,
+            &3_000,
+        );
     });
 }
 
@@ -166,14 +177,32 @@ fn bench_get_trend_monthly_year() {
 
     let kind = symbol_short!("REC_CNT");
     let (cpu, mem) = measure(&env, "get_trend_12_months", || {
-        let trend = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &4_000, &4_011);
+        let trend = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &4_000,
+            &4_011,
+        );
         assert_eq!(trend.len(), 12);
     });
 
     // All 12 points must be returned with non-zero counts (we seeded them).
-    let trend = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &4_000, &4_011);
+    let trend = client.get_trend(
+        &kind,
+        &Some(symbol_short!("NG")),
+        &Some(symbol_short!("A18_39")),
+        &Some(symbol_short!("MYOPIA")),
+        &4_000,
+        &4_011,
+    );
     for point in trend.iter() {
-        assert_eq!(point.value.count, 1, "bucket {} has count 0", point.time_bucket);
+        assert_eq!(
+            point.value.count, 1,
+            "bucket {} has count 0",
+            point.time_bucket
+        );
     }
     let _ = (cpu, mem);
 }
@@ -186,7 +215,14 @@ fn bench_get_trend_weekly_year() {
 
     let kind = symbol_short!("REC_CNT");
     let (cpu, mem) = measure(&env, "get_trend_52_weeks", || {
-        let trend = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &5_000, &5_051);
+        let trend = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &5_000,
+            &5_051,
+        );
         assert_eq!(trend.len(), 52);
     });
     let _ = (cpu, mem);
@@ -206,15 +242,33 @@ fn bench_cross_period_comparison_h1_vs_h2() {
     let kind = symbol_short!("REC_CNT");
 
     let (cpu_h1, _) = measure(&env, "cross_period_H1_26w", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &6_000, &6_025);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &6_000,
+            &6_025,
+        );
     });
 
     let (cpu_h2, _) = measure(&env, "cross_period_H2_26w", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &6_026, &6_051);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &6_026,
+            &6_051,
+        );
     });
 
     // Both halves must have equal cost ± 10 % (symmetric workload).
-    let diff = if cpu_h1 > cpu_h2 { cpu_h1 - cpu_h2 } else { cpu_h2 - cpu_h1 };
+    let diff = if cpu_h1 > cpu_h2 {
+        cpu_h1 - cpu_h2
+    } else {
+        cpu_h2 - cpu_h1
+    };
     let tolerance = cpu_h1 / 10;
     std::println!("[REGRESSION] cross_period_symmetry: h1={cpu_h1}, h2={cpu_h2}, diff={diff}, tol={tolerance}");
     assert!(
@@ -232,17 +286,37 @@ fn bench_cross_period_comparison_year_vs_year() {
     let kind = symbol_short!("REC_CNT");
 
     let (cpu_a, mem_a) = measure(&env, "cross_period_year_A_52w", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &7_000, &7_051);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &7_000,
+            &7_051,
+        );
     });
 
     let (cpu_b, mem_b) = measure(&env, "cross_period_year_B_52w", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &8_000, &8_051);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &8_000,
+            &8_051,
+        );
     });
 
-    std::println!("[GAS] year_vs_year: year_A cpu={cpu_a} mem={mem_a}, year_B cpu={cpu_b} mem={mem_b}");
+    std::println!(
+        "[GAS] year_vs_year: year_A cpu={cpu_a} mem={mem_a}, year_B cpu={cpu_b} mem={mem_b}"
+    );
 
     // Both full-year queries must have equal cost ± 10 %.
-    let diff = if cpu_a > cpu_b { cpu_a - cpu_b } else { cpu_b - cpu_a };
+    let diff = if cpu_a > cpu_b {
+        cpu_a - cpu_b
+    } else {
+        cpu_b - cpu_a
+    };
     let tolerance = cpu_a / 10;
     assert!(
         diff <= tolerance,
@@ -295,7 +369,12 @@ fn bench_full_year_ingestion_and_query() {
     );
     assert_eq!(trend.len(), 52);
     for point in trend.iter() {
-        assert_eq!(point.value.count, 1, "week {} missing data", point.time_bucket - 9_000);
+        assert_eq!(
+            point.value.count,
+            1,
+            "week {} missing data",
+            point.time_bucket - 9_000
+        );
     }
 }
 
@@ -312,12 +391,17 @@ fn regression_trend_cost_exceeds_single_metric_read() {
     });
 
     let (cpu_trend_52, _) = measure(&env, "regression_trend_52w_read", || {
-        let _ = client.get_trend(&kind, &Some(symbol_short!("NG")), &Some(symbol_short!("A18_39")), &Some(symbol_short!("MYOPIA")), &10_000, &10_051);
+        let _ = client.get_trend(
+            &kind,
+            &Some(symbol_short!("NG")),
+            &Some(symbol_short!("A18_39")),
+            &Some(symbol_short!("MYOPIA")),
+            &10_000,
+            &10_051,
+        );
     });
 
-    std::println!(
-        "[REGRESSION] single_vs_trend: single={cpu_single}, trend_52={cpu_trend_52}"
-    );
+    std::println!("[REGRESSION] single_vs_trend: single={cpu_single}, trend_52={cpu_trend_52}");
     assert!(
         cpu_trend_52 > cpu_single,
         "get_trend(52) should cost more than get_metric(1): trend={cpu_trend_52}, single={cpu_single}"

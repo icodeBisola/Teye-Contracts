@@ -27,8 +27,12 @@ impl MockIdentityContract {
     ) {
         env.storage().instance().set(&GUARDIANS_KEY, &guardians);
         env.storage().instance().set(&THRESHOLD_KEY, &threshold);
-        env.storage().instance().set(&FAIL_GUARDIANS_KEY, &fail_guardians);
-        env.storage().instance().set(&FAIL_THRESHOLD_KEY, &fail_threshold);
+        env.storage()
+            .instance()
+            .set(&FAIL_GUARDIANS_KEY, &fail_guardians);
+        env.storage()
+            .instance()
+            .set(&FAIL_THRESHOLD_KEY, &fail_threshold);
     }
 
     pub fn get_guardians(env: Env, _owner: Address) -> Vec<Address> {
@@ -91,7 +95,13 @@ fn setup() -> (
     key_manager.initialize(&admin, &identity_id);
 
     (
-        env, key_manager, admin, identity_id, guardian1, guardian2, outsider,
+        env,
+        key_manager,
+        admin,
+        identity_id,
+        guardian1,
+        guardian2,
+        outsider,
     )
 }
 
@@ -123,11 +133,7 @@ fn recovery_flow_uses_mock_identity_contract_data() {
     let key_id = create_master_key(&env, &client, &admin, 7);
 
     assert_eq!(
-        client.try_initiate_recovery(
-            &outsider,
-            &key_id,
-            &BytesN::from_array(&env, &[8u8; 32]),
-        ),
+        client.try_initiate_recovery(&outsider, &key_id, &BytesN::from_array(&env, &[8u8; 32]),),
         Err(Ok(ContractError::NotAGuardian))
     );
 
@@ -216,7 +222,10 @@ fn use_key_invariants_remain_intact_after_cross_contract_recovery_failures() {
     guardians.push_back(guardian2);
     identity.configure(&guardians, &2, &false, &true);
 
-    assert!(matches!(client.try_execute_recovery(&admin, &key_id), Err(Err(_))));
+    assert!(matches!(
+        client.try_execute_recovery(&admin, &key_id),
+        Err(Err(_))
+    ));
 
     let current = client.use_key(&admin, &key_id, &symbol_short!("ENC"));
     assert_eq!(current, BytesN::from_array(&env, &[31u8; 32]));

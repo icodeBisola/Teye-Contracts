@@ -30,8 +30,8 @@ fn setup() -> (Env, Address, Address, Address) {
     env.mock_all_auths();
     env.ledger().set(ledger_at(1_000));
     let contract_id = env.register_contract(None, DelegationContract);
-    let admin    = Address::generate(&env);
-    let creator  = Address::generate(&env);
+    let admin = Address::generate(&env);
+    let creator = Address::generate(&env);
     let executor = Address::generate(&env);
     let client = teye_delegation::DelegationContractClient::new(&env, &contract_id);
     client.initialize(&admin);
@@ -86,7 +86,12 @@ fn test_submit_result_after_deadline_panics() {
     let task_id = client.submit_task(&creator, &make_bytes(&env, 5), &1u32, &3_000u64);
     client.assign_task(&executor, &task_id);
     env.ledger().set(ledger_at(4_000));
-    client.submit_result(&executor, &task_id, &make_bytes(&env, 10), &make_bytes(&env, 11));
+    client.submit_result(
+        &executor,
+        &task_id,
+        &make_bytes(&env, 10),
+        &make_bytes(&env, 11),
+    );
 }
 
 #[test]
@@ -96,7 +101,12 @@ fn test_submit_result_before_deadline_changes_status() {
     let task_id = client.submit_task(&creator, &make_bytes(&env, 6), &1u32, &9_000u64);
     client.assign_task(&executor, &task_id);
     env.ledger().set(ledger_at(2_000));
-    client.submit_result(&executor, &task_id, &make_bytes(&env, 20), &make_bytes(&env, 21));
+    client.submit_result(
+        &executor,
+        &task_id,
+        &make_bytes(&env, 20),
+        &make_bytes(&env, 21),
+    );
     let task = client.get_task(&task_id).expect("Task should exist");
     assert_ne!(format!("{:?}", task.status), "Assigned");
 }
@@ -119,7 +129,7 @@ fn test_multiple_tasks_independent_deadlines() {
     let executor2 = Address::generate(&env);
     client.register_executor(&executor2);
     let _short = client.submit_task(&creator, &make_bytes(&env, 8), &1u32, &2_000u64);
-    let long   = client.submit_task(&creator, &make_bytes(&env, 9), &1u32, &9_000u64);
+    let long = client.submit_task(&creator, &make_bytes(&env, 9), &1u32, &9_000u64);
     env.ledger().set(ledger_at(3_000));
     client.assign_task(&executor, &long);
     assert_eq!(client.get_task(&long).unwrap().executor, Some(executor));
@@ -132,7 +142,12 @@ fn test_executor_reputation_changes_after_result() {
     let rep_before = client.get_executor_info(&executor).unwrap().reputation;
     let task_id = client.submit_task(&creator, &make_bytes(&env, 10), &1u32, &9_000u64);
     client.assign_task(&executor, &task_id);
-    client.submit_result(&executor, &task_id, &make_bytes(&env, 30), &make_bytes(&env, 31));
+    client.submit_result(
+        &executor,
+        &task_id,
+        &make_bytes(&env, 30),
+        &make_bytes(&env, 31),
+    );
     let rep_after = client.get_executor_info(&executor).unwrap().reputation;
     assert_ne!(rep_after, rep_before);
 }

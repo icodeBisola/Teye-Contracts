@@ -77,7 +77,10 @@ fn setup(option_count: u32) -> (Env, Address, ZkVotingClient<'static>) {
 
     // Trivial VK (mock verifier ignores it for result, only checks byte rules).
     let z = BytesN::from_array(&env, &[0u8; 32]);
-    let g1z = zk_verifier::vk::G1Point { x: z.clone(), y: z.clone() };
+    let g1z = zk_verifier::vk::G1Point {
+        x: z.clone(),
+        y: z.clone(),
+    };
     let g2z = zk_verifier::vk::G2Point {
         x: (z.clone(), z.clone()),
         y: (z.clone(), z.clone()),
@@ -140,7 +143,11 @@ fn test_wallet_to_option_correlation_impossible() {
 
     let results = client.get_results();
     assert_eq!(results.tallies.get(0).unwrap(), 1u64, "option 0 has 1 vote");
-    assert_eq!(results.tallies.get(1).unwrap(), 0u64, "option 1 has 0 votes");
+    assert_eq!(
+        results.tallies.get(1).unwrap(),
+        0u64,
+        "option 1 has 0 votes"
+    );
     assert_eq!(results.tallies.get(2).unwrap(), 1u64, "option 2 has 1 vote");
 
     // There is no method on the contract that maps nullifier → option or
@@ -164,7 +171,10 @@ fn test_nullifier_prevents_double_vote_across_options() {
     // Try to vote for a *different* option with the same nullifier.
     let (p2, i2) = valid_proof(&env);
     let second = client.try_cast_vote(&n, &1u32, &p2, &i2);
-    assert!(second.is_err(), "nullifier reuse must be rejected regardless of option");
+    assert!(
+        second.is_err(),
+        "nullifier reuse must be rejected regardless of option"
+    );
 
     // Only the first vote counts.
     let results = client.get_results();
@@ -180,11 +190,7 @@ fn test_aggregate_tally_correct_for_many_anonymous_votes() {
     let (env, _, client) = setup(4);
 
     // 3 votes for option 0, 1 for option 1, 2 for option 2, 0 for option 3.
-    let votes: &[(u8, u32)] = &[
-        (1, 0), (2, 0), (3, 0),
-        (4, 1),
-        (5, 2), (6, 2),
-    ];
+    let votes: &[(u8, u32)] = &[(1, 0), (2, 0), (3, 0), (4, 1), (5, 2), (6, 2)];
     for &(seed, option) in votes {
         let (proof, inputs) = valid_proof(&env);
         client.cast_vote(&nullifier(&env, seed), &option, &proof, &inputs);

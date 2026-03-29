@@ -25,7 +25,9 @@ fn test_successful_initialization() {
 
     // We can verify it worked by calling something admin-gated
     let new_identity = Address::generate(&env);
-    assert!(client.try_set_identity_contract(&admin, &new_identity).is_ok());
+    assert!(client
+        .try_set_identity_contract(&admin, &new_identity)
+        .is_ok());
 }
 
 #[test]
@@ -33,7 +35,7 @@ fn test_double_initialization_is_ignored() {
     let (env, client) = setup_env();
     let admin_1 = Address::generate(&env);
     let identity_1 = Address::generate(&env);
-    
+
     let admin_2 = Address::generate(&env);
     let identity_2 = Address::generate(&env);
 
@@ -45,10 +47,10 @@ fn test_double_initialization_is_ignored() {
     // Verify admin 1 is still the admin
     let dummy = Address::generate(&env);
     let res = client.try_set_identity_contract(&admin_2, &dummy);
-    
+
     // admin_2 should get Unauthorized, proving admin_1 is still the designated admin
     assert_eq!(res.unwrap_err().unwrap(), ContractError::Unauthorized);
-    
+
     // admin_1 should succeed
     assert!(client.try_set_identity_contract(&admin_1, &dummy).is_ok());
 }
@@ -75,13 +77,8 @@ fn test_create_master_key_before_init_returns_not_initialized() {
     };
     let key_bytes = BytesN::from_array(&env, &[1; 32]);
 
-    let res = client.try_create_master_key(
-        &caller,
-        &KeyType::Encryption,
-        &policy,
-        &86400,
-        &key_bytes,
-    );
+    let res =
+        client.try_create_master_key(&caller, &KeyType::Encryption, &policy, &86400, &key_bytes);
     assert_eq!(res.unwrap_err().unwrap(), ContractError::NotInitialized);
 }
 
@@ -120,7 +117,7 @@ fn test_use_key_before_init_returns_not_initialized() {
 
     let res = client.try_use_key(&caller, &key_id, &op);
     // Even though it loads key record first (which might return KeyNotFound),
-    // let's see. Wait, if `load_key_record` happens BEFORE `require_owner_or_admin`, 
+    // let's see. Wait, if `load_key_record` happens BEFORE `require_owner_or_admin`,
     // it will return `KeyNotFound`. Let's actually check behavior.
     assert_eq!(res.unwrap_err().unwrap(), ContractError::KeyNotFound);
 }

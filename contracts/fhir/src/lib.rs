@@ -9,9 +9,7 @@ pub mod types;
 pub use types::FhirError;
 use types::{Gender, Observation, ObservationStatus, Patient};
 
-use common::migration::{
-    self, FieldTransform, Migration, SchemaVersion, CURRENT_VERSION,
-};
+use common::migration::{self, FieldTransform, Migration, SchemaVersion, CURRENT_VERSION};
 
 // Storage keys
 const INITIALIZED: Symbol = symbol_short!("INIT");
@@ -31,7 +29,7 @@ impl FhirContract {
         }
         env.storage().instance().set(&INITIALIZED, &true);
         env.storage().instance().set(&ADMIN, &admin);
-        
+
         // Setup FHIR specific migrations
         setup_fhir_migrations(&env);
     }
@@ -45,7 +43,7 @@ impl FhirContract {
         }
 
         if id.is_empty() || payload.is_empty() {
-             panic_with_error!(env, FhirError::InvalidPayload);
+            panic_with_error!(env, FhirError::InvalidPayload);
         }
 
         let key = (RESOURCES, id.clone());
@@ -55,7 +53,10 @@ impl FhirContract {
 
         let mut data = Map::new(&env);
         data.set(symbol_short!("payload"), payload.into_val(&env));
-        data.set(symbol_short!("updated"), env.ledger().timestamp().into_val(&env));
+        data.set(
+            symbol_short!("updated"),
+            env.ledger().timestamp().into_val(&env),
+        );
 
         env.storage().persistent().set(&key, &data);
         env.storage().persistent().set(&(VERSIONS, id), &1u32);
@@ -64,20 +65,27 @@ impl FhirContract {
     /// Get a stored resource, automatically applying lazy migrations.
     pub fn get_resource(env: Env, id: String) -> Bytes {
         let key = (RESOURCES, id.clone());
-        let mut data: Map<Symbol, Bytes> = env.storage().persistent().get(&key).unwrap_or_else(|| {
-            panic_with_error!(env, FhirError::RecordNotFound)
-        });
+        let mut data: Map<Symbol, Bytes> = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .unwrap_or_else(|| panic_with_error!(env, FhirError::RecordNotFound));
 
-        let version: u32 = env.storage().persistent().get(&(VERSIONS, id.clone())).unwrap_or(1);
-        
+        let version: u32 = env
+            .storage()
+            .persistent()
+            .get(&(VERSIONS, id.clone()))
+            .unwrap_or(1);
+
         // Lazy migration (forward to CURRENT_VERSION defined in common if not specified otherwise)
-        let new_version = migration::lazy_read(&env, &mut data, version).unwrap_or_else(|_| {
-            panic_with_error!(env, FhirError::MigrationFailed)
-        });
+        let new_version = migration::lazy_read(&env, &mut data, version)
+            .unwrap_or_else(|_| panic_with_error!(env, FhirError::MigrationFailed));
 
         if new_version != version {
             env.storage().persistent().set(&key, &data);
-            env.storage().persistent().set(&(VERSIONS, id), &new_version);
+            env.storage()
+                .persistent()
+                .set(&(VERSIONS, id), &new_version);
         }
 
         data.get(symbol_short!("payload")).unwrap()
@@ -92,15 +100,20 @@ impl FhirContract {
         }
 
         let key = (RESOURCES, id.clone());
-        let mut data: Map<Symbol, Bytes> = env.storage().persistent().get(&key).unwrap_or_else(|| {
-            panic_with_error!(env, FhirError::RecordNotFound)
-        });
+        let mut data: Map<Symbol, Bytes> = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .unwrap_or_else(|| panic_with_error!(env, FhirError::RecordNotFound));
 
-        let version: u32 = env.storage().persistent().get(&(VERSIONS, id.clone())).unwrap_or(1);
-        
-        let reached = migration::migrate_forward(&env, &mut data, version, target_version).unwrap_or_else(|_| {
-            panic_with_error!(env, FhirError::MigrationFailed)
-        });
+        let version: u32 = env
+            .storage()
+            .persistent()
+            .get(&(VERSIONS, id.clone()))
+            .unwrap_or(1);
+
+        let reached = migration::migrate_forward(&env, &mut data, version, target_version)
+            .unwrap_or_else(|_| panic_with_error!(env, FhirError::MigrationFailed));
 
         env.storage().persistent().set(&key, &data);
         env.storage().persistent().set(&(VERSIONS, id), &reached);
@@ -115,12 +128,17 @@ impl FhirContract {
         }
 
         let key = (RESOURCES, id.clone());
-        let mut data: Map<Symbol, Bytes> = env.storage().persistent().get(&key).unwrap_or_else(|| {
-            panic_with_error!(env, FhirError::RecordNotFound)
-        });
+        let mut data: Map<Symbol, Bytes> = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .unwrap_or_else(|| panic_with_error!(env, FhirError::RecordNotFound));
 
         data.set(symbol_short!("payload"), payload);
-        data.set(symbol_short!("updated"), env.ledger().timestamp().into_val(&env));
+        data.set(
+            symbol_short!("updated"),
+            env.ledger().timestamp().into_val(&env),
+        );
 
         env.storage().persistent().set(&key, &data);
     }

@@ -55,11 +55,15 @@ fn test_reentrancy_protection_entry_append() {
     let result = symbol_short!("ok");
 
     // Append first entry
-    let seq1 = client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+    let seq1 = client
+        .append_entry(&segment_id, &actor, &action, &target, &result)
+        .unwrap();
     assert_eq!(seq1, 1);
 
     // Append second entry
-    let seq2 = client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+    let seq2 = client
+        .append_entry(&segment_id, &actor, &action, &target, &result)
+        .unwrap();
     assert_eq!(seq2, 2);
 
     // Verify both entries exist
@@ -94,7 +98,9 @@ fn test_reentrancy_protection_concurrent_segments() {
 
     for segment_id in &segments {
         for i in 0..10 {
-            let seq = client.append_entry(segment_id, &actor, &action, &target, &result).unwrap();
+            let seq = client
+                .append_entry(segment_id, &actor, &action, &target, &result)
+                .unwrap();
             assert_eq!(seq, i + 1);
         }
     }
@@ -210,7 +216,9 @@ fn test_reentrancy_protection_sequential_appends() {
 
     // Append 100 entries sequentially
     for i in 0..100 {
-        let seq = client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+        let seq = client
+            .append_entry(&segment_id, &actor, &action, &target, &result)
+            .unwrap();
         assert_eq!(seq, i + 1);
     }
 
@@ -239,7 +247,9 @@ fn test_reentrancy_protection_entry_count_queries() {
 
     // Append entries and verify count after each
     for i in 0..50 {
-        client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+        client
+            .append_entry(&segment_id, &actor, &action, &target, &result)
+            .unwrap();
         let count = client.get_entry_count(&segment_id).unwrap();
         assert_eq!(count, i + 1);
     }
@@ -266,7 +276,9 @@ fn test_reentrancy_protection_multiple_actors() {
     // Each actor appends 10 entries
     for (actor_idx, actor) in actors.iter().enumerate() {
         for entry_idx in 0..10 {
-            let seq = client.append_entry(&segment_id, actor, &action, &target, &result).unwrap();
+            let seq = client
+                .append_entry(&segment_id, actor, &action, &target, &result)
+                .unwrap();
             assert_eq!(seq, (actor_idx * 10 + entry_idx + 1) as u64);
         }
     }
@@ -299,7 +311,9 @@ fn test_reentrancy_protection_different_actions() {
     // Append entries with different actions
     for (i, action) in actions.iter().enumerate() {
         for j in 0..10 {
-            let seq = client.append_entry(&segment_id, &actor, action, &target, &result).unwrap();
+            let seq = client
+                .append_entry(&segment_id, &actor, action, &target, &result)
+                .unwrap();
             assert_eq!(seq, (i * 10 + j + 1) as u64);
         }
     }
@@ -324,7 +338,9 @@ fn test_reentrancy_protection_different_targets() {
     // Create entries for different targets
     for i in 0..100 {
         let target = symbol_short!(&format!("target:{}", i));
-        let seq = client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+        let seq = client
+            .append_entry(&segment_id, &actor, &action, &target, &result)
+            .unwrap();
         assert_eq!(seq, i + 1);
     }
 
@@ -356,7 +372,9 @@ fn test_reentrancy_protection_different_results() {
     // Append entries with different results
     for (i, result) in results.iter().enumerate() {
         for j in 0..10 {
-            let seq = client.append_entry(&segment_id, &actor, &action, &target, result).unwrap();
+            let seq = client
+                .append_entry(&segment_id, &actor, &action, &target, result)
+                .unwrap();
             assert_eq!(seq, (i * 10 + j + 1) as u64);
         }
     }
@@ -383,7 +401,9 @@ fn test_reentrancy_protection_rapid_segment_operations() {
 
         // Append a few entries
         for j in 0..5 {
-            let seq = client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+            let seq = client
+                .append_entry(&segment_id, &actor, &action, &target, &result)
+                .unwrap();
             assert_eq!(seq, j + 1);
         }
 
@@ -410,7 +430,9 @@ fn test_reentrancy_protection_timestamp_consistency() {
 
     // Append entries and verify timestamps are non-decreasing
     for _ in 0..100 {
-        client.append_entry(&segment_id, &actor, &action, &target, &result).unwrap();
+        client
+            .append_entry(&segment_id, &actor, &action, &target, &result)
+            .unwrap();
         let entries = client.get_entries(&segment_id).unwrap();
         let last_entry = entries.get(entries.len() - 1).unwrap();
         assert!(last_entry.timestamp >= prev_timestamp);
@@ -436,12 +458,16 @@ fn test_reentrancy_protection_segment_isolation() {
 
     // Append to segment1
     for i in 0..50 {
-        client.append_entry(&segment1, &actor, &action, &target, &result).unwrap();
+        client
+            .append_entry(&segment1, &actor, &action, &target, &result)
+            .unwrap();
     }
 
     // Append to segment2
     for i in 0..30 {
-        client.append_entry(&segment2, &actor, &action, &target, &result).unwrap();
+        client
+            .append_entry(&segment2, &actor, &action, &target, &result)
+            .unwrap();
     }
 
     // Verify isolation

@@ -51,7 +51,7 @@ fn test_create_proposal_empty_title_reverts() {
 
     let result = client.try_create_proposal(
         &proposer,
-        &soroban_sdk::String::from_str(&env, ""),   // ← empty title
+        &soroban_sdk::String::from_str(&env, ""), // ← empty title
         &soroban_sdk::String::from_str(&env, "Valid description"),
         &Vec::<Address>::new(&env),
         &Vec::<soroban_sdk::Bytes>::new(&env),
@@ -69,7 +69,7 @@ fn test_create_proposal_empty_description_reverts() {
     let result = client.try_create_proposal(
         &proposer,
         &soroban_sdk::String::from_str(&env, "Valid title"),
-        &soroban_sdk::String::from_str(&env, ""),  // ← empty description
+        &soroban_sdk::String::from_str(&env, ""), // ← empty description
         &Vec::<Address>::new(&env),
         &Vec::<soroban_sdk::Bytes>::new(&env),
     );
@@ -87,7 +87,7 @@ fn test_create_proposal_empty_targets_reverts() {
         &proposer,
         &soroban_sdk::String::from_str(&env, "Valid title"),
         &soroban_sdk::String::from_str(&env, "Valid description"),
-        &Vec::<Address>::new(&env),           // ← empty targets
+        &Vec::<Address>::new(&env), // ← empty targets
         &Vec::<soroban_sdk::Bytes>::new(&env),
     );
 
@@ -179,8 +179,8 @@ fn test_initialize_zero_address_admin_reverts() {
     // If your contract uses `Option<Address>` for admin, pass `None` here.
     let result = client.try_initialize(
         &Address::generate(&env), // placeholder – replace with null sentinel if contract exposes one
-        &0_u32,  // ← zero quorum should already cause InvalidInput
-        &0_u64,  // ← zero voting period
+        &0_u32,                   // ← zero quorum should already cause InvalidInput
+        &0_u64,                   // ← zero voting period
     );
 
     assert_eq!(result, Err(Ok(GovernorError::InvalidInput)));

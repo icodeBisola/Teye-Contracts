@@ -75,7 +75,10 @@ fn setup_client(env: &Env) -> (ZkVerifierContractClient<'static>, Address, Addre
     // reachable. The mock verifier only checks a.x[0]==1, c.x[0]==1,
     // public_inputs[0][0]==1 — we don't need a real pairing key.
     let z = zero32(env);
-    let g1z = G1Point { x: z.clone(), y: z.clone() };
+    let g1z = G1Point {
+        x: z.clone(),
+        y: z.clone(),
+    };
     let g2z = G2Point {
         x: (z.clone(), z.clone()),
         y: (z.clone(), z.clone()),
@@ -360,7 +363,10 @@ fn test_contract_rejects_zeroed_proof_a() {
     inputs.push_back(nz);
     let req = make_request(&env, user, proof, inputs);
     let result = client.try_verify_access(&req);
-    assert!(result.is_err(), "zeroed proof.a must be rejected by contract");
+    assert!(
+        result.is_err(),
+        "zeroed proof.a must be rejected by contract"
+    );
 }
 
 #[test]
@@ -377,7 +383,10 @@ fn test_contract_rejects_oversized_proof_b() {
     inputs.push_back(nz);
     let req = make_request(&env, user, proof, inputs);
     let result = client.try_verify_access(&req);
-    assert!(result.is_err(), "saturated proof.b must be rejected by contract");
+    assert!(
+        result.is_err(),
+        "saturated proof.b must be rejected by contract"
+    );
 }
 
 #[test]
@@ -460,7 +469,10 @@ fn test_recursive_batch_rejects_on_first_invalid_proof() {
     inputs_invalid.push_back(nz.clone());
 
     let vk = {
-        let g1z = G1Point { x: z.clone(), y: z.clone() };
+        let g1z = G1Point {
+            x: z.clone(),
+            y: z.clone(),
+        };
         let g2z = G2Point {
             x: (z.clone(), z.clone()),
             y: (z.clone(), z.clone()),

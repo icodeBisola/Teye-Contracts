@@ -1,4 +1,4 @@
-﻿#![no_std]
+#![no_std]
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod audit;
@@ -945,11 +945,7 @@ impl StakingContract {
         }
 
         let user_stake_key = (USER_STAKE, validator.clone());
-        let current_stake: i128 = env
-            .storage()
-            .persistent()
-            .get(&user_stake_key)
-            .unwrap_or(0);
+        let current_stake: i128 = env.storage().persistent().get(&user_stake_key).unwrap_or(0);
 
         if current_stake <= 0 {
             return Err(ContractError::InsufficientBalance);

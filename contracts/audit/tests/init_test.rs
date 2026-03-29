@@ -33,5 +33,8 @@ fn test_initialize_twice_different_admin_reverts() {
     let admin2 = Address::generate(&env);
     client.initialize(&admin);
     let result = client.try_initialize(&admin2);
-    assert!(result.is_err(), "Re-init with a different admin must still fail");
+    assert!(
+        result.is_err(),
+        "Re-init with a different admin must still fail"
+    );
 }

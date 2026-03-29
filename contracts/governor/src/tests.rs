@@ -39,10 +39,7 @@ fn register_governor(env: &Env) -> (Address, GovernorContractClient) {
     (contract_id, client)
 }
 
-fn default_init(
-    env: &Env,
-    client: &GovernorContractClient,
-) -> (Address, Address, Address) {
+fn default_init(env: &Env, client: &GovernorContractClient) -> (Address, Address, Address) {
     let admin = Address::generate(env);
     let staking = Address::generate(env);
     let treasury = Address::generate(env);
@@ -168,7 +165,7 @@ fn test_time_weight_can_overcome_token_disadvantage() {
     // Whale:  10 000 tokens, 0 age → sqrt(10 000) = 100
     // Whale still wins on tokens alone, but the gap is narrower.
     let loyal_minnow = compute_vote_power(100, 365 * 86_400); // 20
-    let fresh_whale = compute_vote_power(10_000, 0);           // 100
+    let fresh_whale = compute_vote_power(10_000, 0); // 100
     assert_eq!(loyal_minnow, 20);
     assert_eq!(fresh_whale, 100);
     // A very loyal small holder with 2500 tokens beats a fresh whale with 10 000.

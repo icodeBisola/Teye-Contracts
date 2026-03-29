@@ -156,10 +156,7 @@ fn test_invalid_merkle_proof_rejected() {
 
     // Import should fail with invalid proof
     let result = client.try_import_record(&pkg, &exported_root);
-    assert!(
-        result.is_err(),
-        "Tampered Merkle proof should be rejected"
-    );
+    assert!(result.is_err(), "Tampered Merkle proof should be rejected");
 }
 
 /// Test that proofs against unregistered state roots are rejected

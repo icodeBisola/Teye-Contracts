@@ -1,7 +1,9 @@
 extern crate std;
 
-use analytics::{AnalyticsContract, AnalyticsContractClient, MetricDimensions, MetricValue, ContractError};
-use soroban_sdk::{testutils::Address as _, Address, Env, Vec, symbol_short};
+use analytics::{
+    AnalyticsContract, AnalyticsContractClient, ContractError, MetricDimensions, MetricValue,
+};
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Vec};
 
 fn setup_multi_tenant() -> (Env, AnalyticsContractClient<'static>, Address, Address) {
     let env = Env::default();
@@ -159,7 +161,7 @@ fn test_tenant_isolation_with_different_dimensions() {
 
     // Same region, different age bands - should be isolated
     let region = symbol_short!("REGION_X");
-    
+
     let age_band_young = MetricDimensions {
         region: Some(region),
         age_band: Some(symbol_short!("A18_39")),
@@ -262,7 +264,7 @@ fn test_aggregate_tenant_isolation() {
 
     // Create multiple entries for the same tenant
     let tenant_a_region = symbol_short!("HOSPITAL_A");
-    
+
     let conditions = vec![
         symbol_short!("MYOPIA"),
         symbol_short!("GLAUCOMA"),
@@ -370,10 +372,10 @@ fn test_trend_isolation_across_tenants() {
     for i in 0..3 {
         let point_a = trend_a.get(i).unwrap();
         let point_b = trend_b.get(i).unwrap();
-        
+
         assert_eq!(point_a.time_bucket, point_b.time_bucket);
         assert_eq!(point_a.value.count, point_b.value.count); // Both should have count 1
-        
+
         // The sums should be different (different data for each tenant)
         // Due to differential privacy noise, we just check they're not zero
         assert!(point_a.value.sum > 0);

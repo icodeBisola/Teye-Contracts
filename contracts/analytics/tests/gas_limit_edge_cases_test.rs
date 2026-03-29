@@ -26,7 +26,9 @@ fn setup() -> (Env, AnalyticsContractClient<'static>, Address, Address) {
     };
     let priv_key = PaillierPrivateKey { lambda: 20, mu: 5 };
 
-    client.initialize(&admin, &aggregator, &pub_key, &Some(priv_key)).unwrap();
+    client
+        .initialize(&admin, &aggregator, &pub_key, &Some(priv_key))
+        .unwrap();
 
     (env, client, admin, aggregator)
 }
@@ -106,7 +108,7 @@ fn test_gas_limit_extreme_values_batch() {
 
     // Create batch with extreme values
     let mut records = Vec::new(&env);
-    
+
     // Add i128::MAX values
     for _ in 0..100 {
         let encrypted = client.encrypt(&i128::MAX);
@@ -332,7 +334,10 @@ fn test_gas_limit_time_window_expiration() {
     );
 
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err().unwrap(), ContractError::SubmissionExpired);
+    assert_eq!(
+        result.unwrap_err().unwrap(),
+        ContractError::SubmissionExpired
+    );
 }
 
 /// Test gas limits with time-window not yet active
@@ -420,7 +425,9 @@ fn test_gas_limit_metric_retrieval_after_massive_aggregation() {
         records.push_back(encrypted);
     }
 
-    client.aggregate_records(&aggregator, &kind, &dims, &records).unwrap();
+    client
+        .aggregate_records(&aggregator, &kind, &dims, &records)
+        .unwrap();
 
     // Retrieve metric - should be fast despite large aggregation
     let metric = client.get_metric(&kind, &dims);
@@ -454,7 +461,9 @@ fn test_gas_limit_trend_computation_many_buckets() {
             records.push_back(encrypted);
         }
 
-        client.aggregate_records(&aggregator, &kind, &dims, &records).unwrap();
+        client
+            .aggregate_records(&aggregator, &kind, &dims, &records)
+            .unwrap();
     }
 
     // Retrieve trend across all buckets
@@ -490,7 +499,9 @@ fn test_gas_limit_integer_overflow_protection() {
         records1.push_back(encrypted);
     }
 
-    client.aggregate_records(&aggregator, &kind, &dims, &records1).unwrap();
+    client
+        .aggregate_records(&aggregator, &kind, &dims, &records1)
+        .unwrap();
 
     // Second aggregation - should saturate instead of overflow
     let mut records2 = Vec::new(&env);
@@ -499,7 +510,9 @@ fn test_gas_limit_integer_overflow_protection() {
         records2.push_back(encrypted);
     }
 
-    client.aggregate_records(&aggregator, &kind, &dims, &records2).unwrap();
+    client
+        .aggregate_records(&aggregator, &kind, &dims, &records2)
+        .unwrap();
 
     // Verify saturation occurred
     let metric = client.get_metric(&kind, &dims);

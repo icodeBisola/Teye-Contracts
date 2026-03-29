@@ -1,7 +1,7 @@
 extern crate std;
 
 use analytics::{AnalyticsContract, AnalyticsContractClient, ContractError};
-use soroban_sdk::{testutils::Address as _, Address, Env, Vec, symbol_short};
+use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env, Vec};
 
 fn setup() -> (Env, AnalyticsContractClient<'static>, Address, Address) {
     let env = Env::default();
@@ -46,10 +46,15 @@ fn test_unauthorized_initialize() {
     let priv_key = analytics::homomorphic::PaillierPrivateKey { lambda: 20, mu: 5 };
 
     // Test that unauthorized user cannot initialize
-    let result = client.try_initialize(&unauthorized_user, &aggregator, &pub_key, &Some(priv_key.clone()));
+    let result = client.try_initialize(
+        &unauthorized_user,
+        &aggregator,
+        &pub_key,
+        &Some(priv_key.clone()),
+    );
     // This should actually succeed because the contract is not initialized yet
     assert!(result.is_ok());
-    
+
     // But now that it's initialized, trying again should fail
     let result2 = client.try_initialize(&admin, &aggregator, &pub_key, &Some(priv_key));
     assert!(result2.is_err());
@@ -251,10 +256,10 @@ fn test_multiple_unauthorized_users() {
     // Test that multiple unauthorized users cannot decrypt
     let result1 = client.try_decrypt(&unauthorized_user1, &ciphertext);
     let result2 = client.try_decrypt(&unauthorized_user2, &ciphertext);
-    
+
     assert!(result1.is_err());
     assert_eq!(result1.unwrap_err(), Ok(ContractError::Unauthorized));
-    
+
     assert!(result2.is_err());
     assert_eq!(result2.unwrap_err(), Ok(ContractError::Unauthorized));
 }
@@ -276,15 +281,22 @@ fn test_admin_vs_aggregator_roles() {
     // Test that admin cannot aggregate (only aggregator can)
     let admin_aggregate_result = client.try_aggregate_records(&admin, &kind, &dims, &records);
     assert!(admin_aggregate_result.is_err());
-    assert_eq!(admin_aggregate_result.unwrap_err(), Ok(ContractError::Unauthorized));
+    assert_eq!(
+        admin_aggregate_result.unwrap_err(),
+        Ok(ContractError::Unauthorized)
+    );
 
     // Test that admin cannot decrypt (only aggregator can)
     let admin_decrypt_result = client.try_decrypt(&admin, &ciphertext);
     assert!(admin_decrypt_result.is_err());
-    assert_eq!(admin_decrypt_result.unwrap_err(), Ok(ContractError::Unauthorized));
+    assert_eq!(
+        admin_decrypt_result.unwrap_err(),
+        Ok(ContractError::Unauthorized)
+    );
 
     // Test that aggregator can perform both operations
-    let aggregator_aggregate_result = client.try_aggregate_records(&aggregator, &kind, &dims, &records);
+    let aggregator_aggregate_result =
+        client.try_aggregate_records(&aggregator, &kind, &dims, &records);
     assert!(aggregator_aggregate_result.is_ok());
 
     let aggregator_decrypt_result = client.try_decrypt(&aggregator, &ciphertext);

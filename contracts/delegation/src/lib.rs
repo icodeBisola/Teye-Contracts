@@ -1,12 +1,12 @@
 #![no_std]
 
-pub mod task_queue;
-pub mod executor;
-pub mod verification;
 pub mod events;
+pub mod executor;
+pub mod task_queue;
+pub mod verification;
 
-use soroban_sdk::{contract, contractimpl, Address, Env, BytesN, symbol_short, Symbol};
-use crate::task_queue::{TaskStatus};
+use crate::task_queue::TaskStatus;
+use soroban_sdk::{contract, contractimpl, symbol_short, Address, BytesN, Env, Symbol};
 
 #[contract]
 pub struct DelegationContract;
@@ -31,7 +31,8 @@ impl DelegationContract {
         deadline: u64,
     ) -> u64 {
         creator.require_auth();
-        let task_id = task_queue::create_task(&env, creator.clone(), input_data, priority, deadline);
+        let task_id =
+            task_queue::create_task(&env, creator.clone(), input_data, priority, deadline);
         events::publish_task_submitted(&env, task_id, creator);
         task_id
     }
@@ -74,12 +75,17 @@ impl DelegationContract {
             panic!("Not assigned executor");
         }
 
-        let is_valid = verification::verify_execution_proof(&env, task.input_data.clone(), result.clone(), proof.clone());
+        let is_valid = verification::verify_execution_proof(
+            &env,
+            task.input_data.clone(),
+            result.clone(),
+            proof.clone(),
+        );
         if is_valid {
             task.result = Some(result);
             task.proof = Some(proof);
             task.status = TaskStatus::Completed;
-            
+
             if let Some(mut info) = executor::get_executor(&env, executor.clone()) {
                 info.tasks_completed += 1;
                 info.reputation += 1;

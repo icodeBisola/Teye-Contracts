@@ -3,8 +3,8 @@
 extern crate std;
 
 use ai_integration::{
-    AiIntegrationContract, AiIntegrationContractClient, AiProvider, AnalysisRequest, AnalysisResult,
-    ProviderStatus, RequestStatus, VerificationState,
+    AiIntegrationContract, AiIntegrationContractClient, AiProvider, AnalysisRequest,
+    AnalysisResult, ProviderStatus, RequestStatus, VerificationState,
 };
 use soroban_sdk::xdr::{ContractEvent, ContractEventBody, ScVal};
 use soroban_sdk::{
@@ -41,7 +41,10 @@ fn assert_event(
     expected_data: Val,
 ) {
     let ContractEventBody::V0(body) = &event.body;
-    assert_eq!(body.topics.as_slice(), to_scvals(env, expected_topics).as_slice());
+    assert_eq!(
+        body.topics.as_slice(),
+        to_scvals(env, expected_topics).as_slice()
+    );
     assert_eq!(body.data, ScVal::try_from_val(env, &expected_data).unwrap());
 }
 
@@ -49,7 +52,12 @@ fn assert_single_event(env: &Env, expected_topics: soroban_sdk::Vec<Val>, expect
     let events = env.events().all();
     let raw_events = events.events();
     assert_eq!(raw_events.len(), 1);
-    assert_event(env, raw_events.last().unwrap(), expected_topics, expected_data);
+    assert_event(
+        env,
+        raw_events.last().unwrap(),
+        expected_topics,
+        expected_data,
+    );
 }
 
 #[test]

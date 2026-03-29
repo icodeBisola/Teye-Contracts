@@ -1,8 +1,11 @@
 #![cfg(test)]
 
-use soroban_sdk::{testutils::{Address as _, Ledger as _}, Address, Env, String, Vec};
+use emr_bridge::types::{DataFormat, EmrSystem};
 use emr_bridge::{EmrBridgeContract, EmrBridgeContractClient, EmrBridgeError};
-use emr_bridge::types::{EmrSystem, DataFormat};
+use soroban_sdk::{
+    testutils::{Address as _, Ledger as _},
+    Address, Env, String, Vec,
+};
 
 #[test]
 fn test_create_field_mapping_empty_strings() {
@@ -16,7 +19,7 @@ fn test_create_field_mapping_empty_strings() {
     client.initialize(&admin);
 
     let provider_id = String::from_str(&env, "prov_1_zero");
-    
+
     let result = client.try_create_field_mapping(
         &admin,
         &String::from_str(&env, "map_1"),
@@ -37,7 +40,7 @@ fn test_create_field_mapping_empty_strings() {
     );
 
     let empty_str = String::from_str(&env, "");
-    
+
     let result_empty_src = client.try_create_field_mapping(
         &admin,
         &String::from_str(&env, "map_1"),
@@ -46,7 +49,10 @@ fn test_create_field_mapping_empty_strings() {
         &String::from_str(&env, "tgt"),
         &String::from_str(&env, "rule"),
     );
-    assert_eq!(result_empty_src.unwrap_err(), Ok(EmrBridgeError::InvalidMapping));
+    assert_eq!(
+        result_empty_src.unwrap_err(),
+        Ok(EmrBridgeError::InvalidMapping)
+    );
 
     let result_empty_tgt = client.try_create_field_mapping(
         &admin,
@@ -56,7 +62,10 @@ fn test_create_field_mapping_empty_strings() {
         &empty_str,
         &String::from_str(&env, "rule"),
     );
-    assert_eq!(result_empty_tgt.unwrap_err(), Ok(EmrBridgeError::InvalidMapping));
+    assert_eq!(
+        result_empty_tgt.unwrap_err(),
+        Ok(EmrBridgeError::InvalidMapping)
+    );
 }
 
 #[test]
@@ -69,7 +78,7 @@ fn test_verify_sync_empty_discrepancies() {
 
     let admin = Address::generate(&env);
     client.initialize(&admin);
-    
+
     let provider_id = String::from_str(&env, "prov_1");
     client.register_provider(
         &admin,
@@ -80,7 +89,7 @@ fn test_verify_sync_empty_discrepancies() {
         &DataFormat::Json,
     );
     client.activate_provider(&admin, &provider_id);
-    
+
     let exchange_id = String::from_str(&env, "ex_1");
     client.record_data_exchange(
         &admin,
@@ -92,10 +101,10 @@ fn test_verify_sync_empty_discrepancies() {
         &String::from_str(&env, "Observation"),
         &String::from_str(&env, "hash_1"),
     );
-    
+
     let discrepancies: Vec<String> = Vec::new(&env);
     let verification_id = String::from_str(&env, "v_1");
-    
+
     let result = client.verify_sync(
         &admin,
         &verification_id,

@@ -59,13 +59,14 @@ fn test_decreasing_timestamp_rejected() {
 fn test_out_of_order_error_contains_correct_sequence() {
     let mut log = MerkleLog::new(seg("chrono-seq"));
     log.append(5_000, "a", "read", "r:1", "ok").unwrap();
-    let err = log
-        .append(4_999, "b", "write", "r:2", "ok")
-        .unwrap_err();
+    let err = log.append(4_999, "b", "write", "r:2", "ok").unwrap_err();
 
     match err {
         AuditError::OutOfOrderTimestamp { sequence, .. } => {
-            assert_eq!(sequence, 2, "sequence in error must be the rejected entry's sequence");
+            assert_eq!(
+                sequence, 2,
+                "sequence in error must be the rejected entry's sequence"
+            );
         }
         other => panic!("expected OutOfOrderTimestamp, got {other:?}"),
     }
@@ -75,13 +76,14 @@ fn test_out_of_order_error_contains_correct_sequence() {
 fn test_out_of_order_error_contains_supplied_timestamp() {
     let mut log = MerkleLog::new(seg("chrono-supplied"));
     log.append(5_000, "a", "read", "r:1", "ok").unwrap();
-    let err = log
-        .append(3_000, "b", "write", "r:2", "ok")
-        .unwrap_err();
+    let err = log.append(3_000, "b", "write", "r:2", "ok").unwrap_err();
 
     match err {
         AuditError::OutOfOrderTimestamp { supplied, .. } => {
-            assert_eq!(supplied, 3_000, "supplied field must equal the rejected timestamp");
+            assert_eq!(
+                supplied, 3_000,
+                "supplied field must equal the rejected timestamp"
+            );
         }
         other => panic!("expected OutOfOrderTimestamp, got {other:?}"),
     }
@@ -91,9 +93,7 @@ fn test_out_of_order_error_contains_supplied_timestamp() {
 fn test_out_of_order_error_contains_minimum_timestamp() {
     let mut log = MerkleLog::new(seg("chrono-min"));
     log.append(7_000, "a", "read", "r:1", "ok").unwrap();
-    let err = log
-        .append(6_000, "b", "write", "r:2", "ok")
-        .unwrap_err();
+    let err = log.append(6_000, "b", "write", "r:2", "ok").unwrap_err();
 
     match err {
         AuditError::OutOfOrderTimestamp { minimum, .. } => {

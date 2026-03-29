@@ -447,7 +447,7 @@ fn bind_duplicate_credential_is_idempotent() {
     let cred_id = BytesN::from_array(&env, &[0x42u8; 32]);
     client.bind_credential(&owner, &cred_id);
     client.bind_credential(&owner, &cred_id); // duplicate — no error
-    // Should still have only 1 credential bound.
+                                              // Should still have only 1 credential bound.
     assert_eq!(client.get_bound_credentials(&owner).len(), 1);
 }
 

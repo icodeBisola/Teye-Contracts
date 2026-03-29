@@ -108,7 +108,7 @@ mod tests {
         assert!(state.record_hit(0, &cfg)); // request 1
         assert!(state.record_hit(0, &cfg)); // request 2
         assert!(state.record_hit(0, &cfg)); // request 3
-        // 4th request within the same window must be denied.
+                                            // 4th request within the same window must be denied.
         assert!(!state.record_hit(0, &cfg));
     }
 
@@ -133,7 +133,7 @@ mod tests {
         let mut state = RateLimiterState::new(0);
 
         assert!(state.record_hit(0, &cfg)); // 1st request
-        // At t=59 the window [0, 60) has not yet expired.
+                                            // At t=59 the window [0, 60) has not yet expired.
         assert!(!state.record_hit(59, &cfg));
         // At t=60 the window resets and the request is allowed.
         assert!(state.record_hit(60, &cfg));

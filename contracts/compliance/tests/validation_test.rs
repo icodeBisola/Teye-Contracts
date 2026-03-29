@@ -269,7 +269,9 @@ fn breach_detector_empty_actor_records_without_panic() {
     let alerts = detector.record_event(event);
     // Low sensitivity + non-clinical role → no role anomaly (sensitivity < 2).
     assert!(
-        !alerts.iter().any(|a| a.alert_type == AlertType::RoleAnomaly),
+        !alerts
+            .iter()
+            .any(|a| a.alert_type == AlertType::RoleAnomaly),
         "Zero sensitivity should skip role anomaly check"
     );
 }
@@ -503,7 +505,10 @@ fn audit_log_search_empty_keyword() {
 fn audit_log_query_range_zero_to_zero() {
     let log = make_audit_log();
     let entries = log.query_range(0, 0);
-    assert!(entries.is_empty(), "Empty log queried at (0,0) must return empty");
+    assert!(
+        entries.is_empty(),
+        "Empty log queried at (0,0) must return empty"
+    );
 }
 
 #[test]

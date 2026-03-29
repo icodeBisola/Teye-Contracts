@@ -126,14 +126,8 @@ fn test_gdpr_data_export_restrictions() {
     gdpr::register_gdpr_rules(&mut engine);
 
     // Compliant EU data export
-    let compliant_ctx = create_operation_context(
-        &env,
-        "dr_smith",
-        "data.export",
-        Jurisdiction::EU,
-        true,
-        2,
-    );
+    let compliant_ctx =
+        create_operation_context(&env, "dr_smith", "data.export", Jurisdiction::EU, true, 2);
 
     let verdict = engine.evaluate(&compliant_ctx);
     assert!(verdict.allowed, "Compliant EU export should be allowed");
@@ -185,10 +179,7 @@ fn test_gdpr_right_to_erasure_enforcement() {
     );
 
     let verdict = engine.evaluate(&unauthorized_ctx);
-    assert!(
-        !verdict.allowed,
-        "Unauthorized erasure should be blocked"
-    );
+    assert!(!verdict.allowed, "Unauthorized erasure should be blocked");
     assert!(
         verdict.violations.iter().any(|v| v.rule_id == "GDPR-001"),
         "Should violate GDPR-001 (right to erasure)"
@@ -254,7 +245,10 @@ fn test_gdpr_encryption_requirements() {
     );
 
     let verdict = engine.evaluate(&encrypted_ctx);
-    assert!(verdict.allowed, "Encrypted sensitive data should be allowed");
+    assert!(
+        verdict.allowed,
+        "Encrypted sensitive data should be allowed"
+    );
 }
 
 /// Test GDPR breach detection and notification
@@ -287,7 +281,12 @@ fn test_gdpr_breach_detection_and_notification() {
 
     // After-hours access to sensitive data
     let after_hours_timestamp = 3 * 3600; // 3 AM UTC
-    detector.record_access("patient:sensitive", "night_owl", "record.read", after_hours_timestamp);
+    detector.record_access(
+        "patient:sensitive",
+        "night_owl",
+        "record.read",
+        after_hours_timestamp,
+    );
 
     assert!(
         detector.is_suspicious("night_owl"),
@@ -416,14 +415,8 @@ fn test_multi_jurisdictional_compliance() {
     gdpr::register_gdpr_rules(&mut engine);
 
     // Multi-jurisdictional context (US patient, EU provider)
-    let multi_juris_ctx = create_operation_context(
-        &env,
-        "dr_euro",
-        "record.read",
-        Jurisdiction::Both,
-        true,
-        3,
-    );
+    let multi_juris_ctx =
+        create_operation_context(&env, "dr_euro", "record.read", Jurisdiction::Both, true, 3);
 
     let verdict = engine.evaluate(&multi_juris_ctx);
 
@@ -459,9 +452,10 @@ fn test_cross_border_data_transfer_compliance() {
     );
 
     // Add metadata for transfer safeguards
-    transfer_ctx
-        .metadata
-        .insert("transfer_safeguard".to_string(), "standard_contractual_clauses".to_string());
+    transfer_ctx.metadata.insert(
+        "transfer_safeguard".to_string(),
+        "standard_contractual_clauses".to_string(),
+    );
     transfer_ctx
         .metadata
         .insert("adequacy_decision".to_string(), "false".to_string());
@@ -636,10 +630,7 @@ fn test_encrypted_data_transit() {
     let verdict = engine.evaluate(&transit_ctx);
 
     // Properly encrypted transit should be allowed
-    assert!(
-        verdict.allowed,
-        "Encrypted data transit should be allowed"
-    );
+    assert!(verdict.allowed, "Encrypted data transit should be allowed");
 }
 
 // ---------------------------------------------------------------------------
@@ -677,7 +668,10 @@ fn test_end_to_end_multijurisdictional_healthcare_exchange() {
     // Check blacklist
     let patient_id = s(&env, "eu_patient_123");
     let is_blacklisted = authority_client.is_blacklisted(&patient_id, &s(&env, "EU"));
-    assert!(!is_blacklisted, "Legitimate patient should not be blacklisted");
+    assert!(
+        !is_blacklisted,
+        "Legitimate patient should not be blacklisted"
+    );
 
     // Evaluate compliance
     let verdict = engine.evaluate(&eu_patient_ctx);
@@ -691,12 +685,12 @@ fn test_end_to_end_multijurisdictional_healthcare_exchange() {
     assert!(records_access.is_ok(), "Record access should succeed");
 
     // Phase 3: Transfer records back to EU provider
-    let transfer_result = registry_client.try_transfer_data(
-        &s(&env, "US"),
-        &s(&env, "EU"),
-        &records_access.unwrap(),
+    let transfer_result =
+        registry_client.try_transfer_data(&s(&env, "US"), &s(&env, "EU"), &records_access.unwrap());
+    assert!(
+        transfer_result.is_ok(),
+        "Cross-border transfer should succeed"
     );
-    assert!(transfer_result.is_ok(), "Cross-border transfer should succeed");
 
     // Phase 4: Patient requests erasure (GDPR right)
     let erasure_ctx = create_operation_context(
@@ -732,7 +726,14 @@ fn test_unknown_jurisdiction_handling() {
     gdpr::register_gdpr_rules(&mut engine);
 
     // Create context with unknown jurisdiction
-    let mut unknown_ctx = create_operation_context(&env, "unknown_actor", "record.read", Jurisdiction::EU, true, 1);
+    let mut unknown_ctx = create_operation_context(
+        &env,
+        "unknown_actor",
+        "record.read",
+        Jurisdiction::EU,
+        true,
+        1,
+    );
 
     // Manually override to simulate unknown jurisdiction
     // In production, this would use a Jurisdiction::Unknown variant

@@ -1,7 +1,7 @@
 #![cfg(test)]
 
-use soroban_sdk::{Env, testutils::Address as _};
-use crate::KeyManagerContract; // adjust path if needed
+use crate::KeyManagerContract;
+use soroban_sdk::{testutils::Address as _, Env}; // adjust path if needed
 
 fn setup_env() -> Env {
     let env = Env::default();

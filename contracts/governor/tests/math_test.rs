@@ -4,7 +4,7 @@ extern crate std;
 
 use governor::voting::{compute_vote_power, isqrt, loyalty_multiplier_scaled, SCALE};
 use governor::GovernorContract;
-use soroban_sdk::{Env, Address};
+use soroban_sdk::{Address, Env};
 
 fn setup_env() -> (Env, Address) {
     let env = Env::default();

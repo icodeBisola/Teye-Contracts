@@ -5,12 +5,12 @@ extern crate std;
 use std::collections::HashMap;
 
 use compliance::{
+    gdpr::register_gdpr_rules,
+    hipaa::register_hipaa_rules,
     rules_engine::{
         ComplianceReport, ComplianceRule, ComplianceVerdict, Jurisdiction, OperationContext,
         Severity, Violation,
     },
-    hipaa::register_hipaa_rules,
-    gdpr::register_gdpr_rules,
 };
 
 /// Test integer overflow protection with maximum u32 values
@@ -175,7 +175,7 @@ fn test_integer_overflow_bulk_access_threshold() {
     // Simulate bulk access detection
     for i in 0..1000 {
         access_count = access_count.saturating_add(1);
-        
+
         if access_count >= bulk_threshold {
             // Bulk access detected
             assert!(access_count >= bulk_threshold);
@@ -283,7 +283,10 @@ fn test_integer_overflow_operations_count() {
 
     // Verify counts
     assert_eq!(total_operations, 1_000_000);
-    assert_eq!(compliant_operations + non_compliant_operations, total_operations);
+    assert_eq!(
+        compliant_operations + non_compliant_operations,
+        total_operations
+    );
 }
 
 /// Test integer overflow in time period calculations
@@ -362,13 +365,7 @@ fn test_integer_overflow_metadata_pairs() {
 /// Test integer overflow in boundary condition checks
 #[test]
 fn test_integer_overflow_boundary_condition_checks() {
-    let test_values = vec![
-        0u32,
-        1u32,
-        u32::MAX / 2,
-        u32::MAX - 1,
-        u32::MAX,
-    ];
+    let test_values = vec![0u32, 1u32, u32::MAX / 2, u32::MAX - 1, u32::MAX];
 
     for value in test_values {
         // Test increment

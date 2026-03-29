@@ -19,11 +19,7 @@ use governor::{
     voting::VoteChoice,
     ContractError, GovernorContract, GovernorContractClient,
 };
-use soroban_sdk::{
-    symbol_short,
-    testutils::Address as _,
-    vec, Address, BytesN, Env, String,
-};
+use soroban_sdk::{symbol_short, testutils::Address as _, vec, Address, BytesN, Env, String};
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -131,10 +127,7 @@ fn double_initialization_rejected() {
 
     // Second initialize must fail with AlreadyInitialized.
     let result = client.try_initialize(&admin, &staking, &treasury, &500i128);
-    assert_eq!(
-        result,
-        Err(Ok(ContractError::AlreadyInitialized))
-    );
+    assert_eq!(result, Err(Ok(ContractError::AlreadyInitialized)));
 }
 
 #[test]
@@ -147,10 +140,7 @@ fn double_initialization_with_different_admin_rejected() {
 
     // Even with different parameters, re-init must be blocked.
     let result = client.try_initialize(&new_admin, &staking, &treasury, &999i128);
-    assert_eq!(
-        result,
-        Err(Ok(ContractError::AlreadyInitialized))
-    );
+    assert_eq!(result, Err(Ok(ContractError::AlreadyInitialized)));
 }
 
 #[test]

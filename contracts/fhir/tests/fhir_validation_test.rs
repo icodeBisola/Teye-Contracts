@@ -4,10 +4,7 @@
 //! critical state-modifying function to verify consistent validation and
 //! correct revert behaviour — preventing silent acceptance of degenerate data.
 
-use soroban_sdk::{
-    testutils::Address as _,
-    Address, Env, String,
-};
+use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 use fhir::contract::{FhirContract, FhirContractClient};
 use fhir::errors::FhirError;

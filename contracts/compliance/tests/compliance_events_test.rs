@@ -4,10 +4,7 @@
 //! state-changed events are emitted to the Soroban environment with the
 //! correct topics and data payloads.
 
-use soroban_sdk::{
-    testutils::Events,
-    vec, Env, IntoVal, Symbol,
-};
+use soroban_sdk::{testutils::Events, vec, Env, IntoVal, Symbol};
 
 use compliance::contract::{ComplianceContract, ComplianceContractClient};
 
@@ -213,9 +210,7 @@ fn test_event_ordering_registration_then_update() {
     let events = env.events().all();
     let topics_list: Vec<Symbol> = events
         .iter()
-        .filter_map(|(_, topics, _)| {
-            topics.get(0).and_then(|t| t.try_into_val(&env).ok())
-        })
+        .filter_map(|(_, topics, _)| topics.get(0).and_then(|t| t.try_into_val(&env).ok()))
         .collect();
 
     let reg_pos = topics_list
